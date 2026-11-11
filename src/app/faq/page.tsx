@@ -1,0 +1,13 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { PageShell } from "@/components/page-shell";
+
+export const metadata: Metadata = { title: "Questions fréquentes", description: "Réponses aux questions fréquentes sur les biens, visites et démarches." };
+const questions = [
+  ["Comment obtenir plus d’informations sur un bien ?", "Utilisez le formulaire de contact depuis la fiche du bien en indiquant sa référence. Les prix, caractéristiques et disponibilités doivent être confirmés par notre équipe."],
+  ["Les biens sont-ils vérifiés ?", "Le badge « Vérifié » ne doit s’afficher que lorsque la validation par une personne habilitée est confirmée. Les fiches de démonstration illustrent ce fonctionnement."],
+  ["Puis-je organiser une visite à distance ?", "Oui, vous pouvez demander un échange à distance. Les créneaux, outils de visioconférence et modalités seront convenus avec l’équipe."],
+  ["Les documents sont-ils accessibles en ligne ?", "Certains documents peuvent être soumis à des règles d’accès. Ils ne doivent pas être publiés sans autorisation et contrôle adaptés."],
+  ["Ces informations constituent-elles un conseil juridique ?", "Non. Les informations du site sont générales et ne remplacent pas un conseil juridique, cadastral ou professionnel adapté à votre situation."],
+];
+export default function FaqPage() { return <PageShell><section className="bg-[#18371d] py-16 text-white"><div className="container"><span className="eyebrow text-[#a6c8ad]">Centre d’aide</span><h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">Questions fréquentes.</h1><p className="mt-4 text-sm text-white/65">Les premières réponses pour avancer en confiance.</p></div></section><section className="container max-w-3xl py-12"><div className="divide-y divide-[#e7ebe5] rounded-2xl border border-[#e7ebe5] bg-white px-6">{questions.map(([question, answer]) => <details key={question} className="group py-5"><summary className="cursor-pointer list-none pr-8 text-sm font-bold text-[#18371d] marker:hidden">{question}<span className="float-right text-[#4f8665] transition group-open:rotate-45">＋</span></summary><p className="mt-3 max-w-2xl text-sm leading-6 text-[#6e7d74]">{answer}</p></details>)}</div><p className="mt-8 text-sm text-[#728078]">Vous n’avez pas trouvé votre réponse ? <Link href="/contact" className="font-bold text-[#32743d]">Contactez-nous.</Link></p></section></PageShell>; }

@@ -1,0 +1,54 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowRight, BadgeCheck, Check, FileLock2, Flag, MapPin, Ruler, Share2 } from "lucide-react";
+import { GoogleMapPanel } from "@/components/google-map-panel";
+import { FavoriteButton } from "@/components/favorite-button";
+import { PageShell } from "@/components/page-shell";
+import { PropertyCard } from "@/components/property-card";
+import { getPublicProperties } from "@/lib/public-properties";
+
+const statusHelp: Record<string, string> = {
+  "Disponible": "Annoncé comme disponible à la date de publication ; à confirmer avec l’équipe.",
+  "À louer": "Annoncé à la location ; conditions et disponibilité à confirmer avec l’équipe.",
+  "Réservé": "Une demande est en cours sur ce bien : sa disponibilité n’est pas garantie.",
+  "Vendu": "Ce bien n’est plus disponible.",
+};
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const property = (await getPublicProperties()).find((item) => item.slug === slug);
+  return property ? {
+    title: `${property.title} — ${property.location}`,
+    description: property.isDemo
+      ? `Fiche de démonstration non vérifiée à ${property.location}. Référence fictive ${property.ref}.`
+      : `${property.title} à ${property.location}. Référence ${property.ref}. Informations publiées par l’équipe Sama Kër.`,
+    ...(property.isDemo ? { robots: { index: false, follow: false } } : {}),
+  } : { title: "Bien introuvable" };
+}
+
+export async function PropertyDetailPage({ params, category = "terrain" }: { params: Promise<{ slug: string }>; category?: "terrain" | "immobilier" }) {
+  const { slug } = await params;
+  const properties = await getPublicProperties();
+  const property = properties.find((item) => item.slug === slug);
+  if (!property || property.category !== category) notFound();
+  const similar = properties.filter((item) => item.category === category && item.slug !== property.slug).slice(0, 2);
+  return <PageShell><section className="container py-8">{property.isDemo ? <p role="note" className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900">Fiche de démonstration : cette annonce, son prix, sa localisation, sa surface et sa disponibilité sont fictifs et non vérifiés.</p> : <p role="note" className="mb-6 rounded-xl border border-[#dce7dc] bg-[#f3f7f1] px-4 py-3 text-xs leading-5 text-[#526b56]">Annonce publiée par l’équipe Sama Kër. Les informations sont à confirmer auprès de l’équipe et ne constituent pas une validation cadastrale ou juridique.</p>}<Link href={category === "terrain" ? "/terrains" : "/immobilier"} className="inline-flex items-center gap-2 text-xs font-semibold text-[#65766d]"><ArrowLeft size={15}/> Tous les biens</Link><div className="mt-7 grid gap-8 lg:grid-cols-[1.45fr_.8fr]">
+    <div>
+      {property.isDemo && property.photos?.length ? <div className="mb-3 rounded-xl border border-[#e8dfc8] bg-[#faf6e9] px-4 py-3 text-[10px] font-semibold leading-5 text-[#786543]">Galerie d’inspiration seulement : ces images ne montrent pas le bien annoncé et ne documentent ni sa localisation, ni son état, ni ses caractéristiques.</div> : null}
+      <div className={`property-art property-art--${property.art} relative h-[340px] rounded-[24px] sm:h-[470px]`}>{property.photos?.[0] && <Image src={property.photos[0].src} alt={property.photos[0].alt} fill priority unoptimized={!property.isDemo} sizes="(max-width: 1024px) 100vw, 60vw" className="rounded-[24px] object-cover"/>}<span className="absolute left-5 top-5 rounded-full bg-white/95 px-3 py-2 text-[10px] font-bold text-[#3b5540]">Réf. {property.ref}</span><span className="absolute bottom-5 left-5 rounded-full bg-white/95 px-3 py-2 text-[10px] font-bold text-[#3b5540]">{property.isDemo ? (property.photos?.[0] ? "Image d’inspiration · pas une photo du bien" : "Visuel illustratif · localisation indicative") : property.photos?.[0] ? "Média publié avec l’annonce" : "Aucune photo autorisée fournie"}</span></div>
+      {property.photos && property.photos.length > 1 && <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">{property.photos.slice(1).map((photo) => <figure key={photo.src} className="overflow-hidden rounded-xl border border-[#e8ebe5] bg-white"><div className="property-art relative h-32 sm:h-36"><Image src={photo.src} alt={photo.alt} fill unoptimized={!property.isDemo} sizes="(max-width: 640px) 50vw, 30vw" className="object-cover"/></div><figcaption className="p-2.5"><span className="block text-[8px] font-semibold leading-4 text-[#596a5d]">{property.isDemo ? "Illustration uniquement" : "Photo publiée avec la fiche"}</span>{photo.sourceUrl ? <a href={photo.sourceUrl} target="_blank" rel="noreferrer" className="mt-1 block truncate text-[8px] text-[#839087] underline underline-offset-2">Source : {photo.credit}</a> : <span className="mt-1 block text-[8px] text-[#839087]">{photo.credit}</span>}</figcaption></figure>)}</div>}
+      {property.photos?.[0]?.sourceUrl && <p className="mt-2 text-right text-[8px] text-[#89938d]">Source principale : <a href={property.photos[0].sourceUrl} target="_blank" rel="noreferrer" className="underline underline-offset-2">{property.photos[0].credit}</a></p>}
+      <div className="mt-8"><span className="eyebrow">À propos de ce bien</span><h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#18371d] sm:text-4xl">{property.title}</h1><p className="mt-3 flex items-center gap-2 text-sm text-[#718078]"><MapPin size={16}/>{property.location}</p><div className="mt-5 rounded-2xl border border-[#e5e9e3] bg-white p-4 lg:hidden"><div className="flex items-start justify-between gap-3"><div><p className="text-xl font-bold tracking-tight text-[#32743d]">{property.priceLabel}</p><p className="mt-1 text-xs text-[#718078]">{property.area} m²</p></div><span className="rounded-full bg-[#eef4ee] px-3 py-1.5 text-[11px] font-bold text-[#3d7759]">{property.status}</span></div><p className="mt-3 text-xs leading-5 text-[#7a8880]">{property.isDemo ? "Donnée fictive, non vérifiée." : statusHelp[property.status]}</p><div className="mt-4 grid grid-cols-2 gap-2"><Link href={`/contact?bien=${property.ref}`} className="flex min-h-12 items-center justify-center rounded-full bg-[#32743d] px-3 text-xs font-bold text-white">Demander des infos</Link><Link href={`/contact?visite=${property.ref}`} className="flex min-h-12 items-center justify-center rounded-full border border-[#dfe6df] px-3 text-xs font-bold text-[#18371d]">Visiter</Link></div></div><p className="mt-6 text-sm leading-7 text-[#5f7168]">{property.description}</p><h2 className="mt-8 text-lg font-bold text-[#18371d]">Caractéristiques</h2><ul className="mt-4 grid gap-3 sm:grid-cols-2">{property.features.map((feature) => <li key={feature} className="flex items-center gap-2 text-sm text-[#617269]"><Check size={15} className="text-[#508160]"/>{feature}</li>)}</ul></div>
+      <div className="mt-8"><h2 className="mb-3 text-lg font-bold text-[#18371d]">Où se situe ce bien ?</h2><p className="mb-4 text-sm leading-6 text-[#5f7168]">Région : <strong>{property.region}</strong>. L’emplacement exact n’est pas publié ; il vous est communiqué par l’équipe lors de votre demande.</p><GoogleMapPanel region={property.region} markers={property.coordinates ? [{ id: property.slug, title: property.title, detail: `${property.priceLabel} · ${property.status}`, href: `/${property.category === "terrain" ? "terrains" : "immobilier"}/${property.slug}`, lat: property.coordinates.lat, lng: property.coordinates.lng }] : []} heightClassName="h-[260px]" note={property.coordinates ? "Le repère indique une zone d’environ 1 km validée par l’équipe, pas l’emplacement exact du bien." : "Vue générale de la région : aucun repère n’indique l’emplacement du bien."}/></div>
+    </div>
+    <aside className="h-fit rounded-2xl border border-[#e5e9e3] bg-white p-6 lg:sticky lg:top-28"><div className="flex items-center justify-between"><span className="rounded-full bg-[#eef4ee] px-3 py-1.5 text-[10px] font-bold text-[#3d7759]">{property.status}</span>{property.verified && <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#3d7759]"><BadgeCheck size={14}/> Vérifié</span>}</div><p className="mt-6 text-[10px] font-bold uppercase tracking-wider text-[#87928c]">Prix indicatif</p><p className="mt-1 text-2xl font-bold tracking-tight text-[#32743d]">{property.priceLabel}</p><div className="mt-5 flex items-center justify-between border-y border-[#edf0eb] py-4"><span className="flex items-center gap-2 text-sm text-[#53665d]"><Ruler size={16}/> Surface</span><strong className="text-sm text-[#18371d]">{property.area} m²</strong></div><p className="mt-5 text-xs leading-5 text-[#7a8880]">{property.isDemo ? "Données fictives : prix, caractéristiques et disponibilité non confirmés." : `${statusHelp[property.status] ?? ""} Prix et caractéristiques à confirmer directement.`}</p><Link href={`/contact?bien=${property.ref}`} className="mt-6 flex items-center justify-center gap-2 rounded-full bg-[#32743d] px-5 py-4 text-sm font-bold text-white">Demander des informations <ArrowRight size={16}/></Link><Link href={`/contact?visite=${property.ref}`} className="mt-3 flex items-center justify-center rounded-full border border-[#dfe6df] px-5 py-4 text-sm font-bold text-[#18371d]">Prendre rendez-vous</Link><FavoriteButton slug={property.slug}/><a href={`https://wa.me/?text=${encodeURIComponent(`Bonjour, je suis intéressé(e) par ${property.title} (${property.ref}) à ${property.location}. Pouvez-vous me renseigner ?`)}`} target="_blank" rel="noreferrer" className="mt-4 flex w-full items-center justify-center gap-2 text-xs font-semibold text-[#718078]"><Share2 size={14}/> Préparer un message WhatsApp</a><Link href={`/contact?bien=${property.ref}&motif=signalement`} className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-[#946447] hover:text-[#73442b]"><Flag size={14}/> Signaler cette annonce</Link></aside>
+    </div><p className="mt-8 flex items-center gap-2 text-xs text-[#89938d]"><FileLock2 size={14}/> Les documents de propriété ne sont pas affichés publiquement ; ils sont communiqués selon les modalités applicables.</p></section>
+    {similar.length > 0 && <section className="bg-white py-16"><div className="container"><h2 className="text-2xl font-semibold text-[#18371d]">D’autres biens à découvrir</h2><div className="mt-6 grid gap-5 md:grid-cols-2">{similar.map((item) => <PropertyCard key={item.slug} property={item}/>)}</div></div></section>}
+  </PageShell>;
+}
+
+export default function TerrainDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  return PropertyDetailPage({ params, category: "terrain" });
+}

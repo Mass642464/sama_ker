@@ -1,0 +1,16 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, Compass, DraftingCompass, Landmark, Map, Ruler, ShieldCheck } from "lucide-react";
+import { PageShell } from "@/components/page-shell";
+
+export const metadata: Metadata = { title: "Nos services", description: "Conseil foncier, études géospatiales et accompagnement immobilier au Sénégal." };
+const services = [
+  { icon: Map, title: "Cartographie & SIG", text: "Production et analyse de données géographiques au service de projets publics et privés." },
+  { icon: Ruler, title: "Topographie", text: "Appui aux missions de levés et de compréhension des caractéristiques d’un site." },
+  { icon: Landmark, title: "Conseil foncier", text: "Aide à la lecture des enjeux d’un terrain et orientation vers les interlocuteurs compétents." },
+  { icon: DraftingCompass, title: "Études territoriales", text: "Analyses spatiales et supports d’aide à la décision adaptés à votre contexte." },
+  { icon: Compass, title: "Accompagnement immobilier", text: "Mise en relation, découverte des biens et organisation des visites." },
+  { icon: ShieldCheck, title: "Parcours diaspora", text: "Un suivi à distance, des échanges planifiés et des étapes expliquées avec clarté." },
+];
+export default function ServicesPage() { return <PageShell><section className="services-hero relative isolate overflow-hidden bg-[#18371d] py-16 text-white sm:py-24"><Image src="/images/apropos.jpg" alt="" fill priority sizes="100vw" className="catalog-hero__image object-cover"/><div className="catalog-hero__shade absolute inset-0" aria-hidden="true"/><div className="container relative z-10"><span className="eyebrow text-[#d0e3d1]">Ce que nous faisons</span><h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight sm:text-6xl">Des expertises croisées, au service du territoire.</h1><p className="mt-6 max-w-xl text-sm leading-7 text-white/85">Un accompagnement à la rencontre du foncier, de l’immobilier et de la donnée géospatiale.</p><p className="mt-3 text-[10px] leading-4 text-white/75">Photo illustrative · ne représente pas nécessairement l’équipe du cabinet.</p></div></section><section className="container py-16"><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{services.map(({ icon: Icon, title, text }, index) => <article key={title} className="service-card rounded-2xl border border-[#e5e9e3] bg-white p-7"><span className="service-card__icon grid size-12 place-items-center rounded-xl bg-[#edf4ee] text-[#3d7759]"><Icon size={21}/></span><span className="mt-7 block text-[10px] font-bold tracking-wider text-[#8c9a91]">EXPERTISE 0{index + 1}</span><h2 className="mt-2 text-xl font-bold text-[#18371d]">{title}</h2><p className="mt-3 text-sm leading-6 text-[#708078]">{text}</p><Link href="/contact" className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-[#32743d]">Demander un devis <ArrowRight size={14}/></Link></article>)}</div><p className="mt-8 text-xs leading-5 text-[#89938d]">Les prestations proposées sont à confirmer avec le cabinet. Les informations de cette maquette ne constituent pas un conseil juridique ou cadastral.</p></section></PageShell>; }
