@@ -1,4 +1,5 @@
 import { getAuthConfig, type VerifiedUser } from "./user-auth";
+import { removeClientPrivateObjects } from "./client-vault";
 
 type ServiceConfig = { baseUrl: string; serviceRoleKey: string };
 
@@ -145,6 +146,9 @@ async function markNotificationsRead(config: ServiceConfig, user: VerifiedUser) 
 // Effacement : d'abord les données de l'application (idempotent), puis le compte d'authentification.
 // Si la seconde étape échoue, l'utilisateur peut recommencer sans perte.
 async function deleteAccount(config: ServiceConfig, user: VerifiedUser) {
+  if (!(await removeClientPrivateObjects(config, user))) {
+    return jsonError("Les fichiers privés n’ont pas pu être retirés. Aucune autre donnée n’a été supprimée ; réessayez.", 503);
+  }
   const erased = await call(config, "/rest/v1/rpc/erase_client_account", { method: "POST", body: { p_user: user.id } });
   if (!erased?.ok) return unavailable();
   const removed = await call(config, `/auth/v1/admin/users/${user.id}`, { method: "DELETE" });

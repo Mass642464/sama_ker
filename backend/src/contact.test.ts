@@ -52,7 +52,7 @@ test("allows authenticated admin headers in CORS preflight", async () => {
   });
   assert.equal(response.status, 204);
   assert.equal(response.headers.get("access-control-allow-methods"), "GET, POST, PATCH, PUT, DELETE, OPTIONS");
-  assert.equal(response.headers.get("access-control-allow-headers"), "Content-Type, Authorization");
+  assert.equal(response.headers.get("access-control-allow-headers"), "Content-Type, Authorization, X-File-Name");
 });
 
 test("rejects requests from origins that are not configured", async () => {

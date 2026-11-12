@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, CircleHelp, Command, History, House, LayoutDashboard, LogOut, MapPinned, ShieldCheck, UserCog, UsersRound } from "lucide-react";
+import { CalendarDays, CircleHelp, Command, Hammer, History, House, LayoutDashboard, LogOut, MapPinned, ShieldCheck, UserCog, UsersRound } from "lucide-react";
 import { signOut } from "@/app/connexion-admin/actions";
 import { adminApi, type AdminPermission, type AdminSession } from "@/lib/admin-api";
 import { AdminSessionProvider } from "@/components/admin-session";
@@ -14,6 +14,7 @@ const navigation: { href: string; label: string; icon: typeof House; permission:
   { href: "/admin/biens", label: "Annonces", icon: MapPinned, permission: "properties:read" },
   { href: "/admin/crm", label: "Prospects", icon: UsersRound, permission: "leads:read" },
   { href: "/admin/agenda", label: "Rendez-vous", icon: CalendarDays, permission: "appointments:read" },
+  { href: "/admin/travaux", label: "Travaux", icon: Hammer, permission: "work:read" },
   { href: "/admin/equipe", label: "Équipe et rôles", icon: UserCog, permission: "staff:manage" },
   { href: "/admin/audit", label: "Journal d’audit", icon: History, permission: "audit:read" },
 ];

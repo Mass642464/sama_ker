@@ -27,6 +27,25 @@ export function readBearerToken(request: Request) {
   return match ? match[1] : null;
 }
 
+// Call only after verifyUser has validated the token with Supabase Auth.
+export function hasRecentPasswordAuthentication(request: Request, now = Date.now()) {
+  const token = readBearerToken(request);
+  if (!token) return false;
+  const encodedPayload = token.split(".")[1];
+  if (!encodedPayload) return false;
+
+  try {
+    const payload: unknown = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8"));
+    if (!isRecord(payload) || typeof payload.auth_time !== "number" || !Array.isArray(payload.amr)) return false;
+    const age = Math.floor(now / 1000) - payload.auth_time;
+    const usedPassword = payload.amr.some((entry) => isRecord(entry) && entry.method === "password");
+    return usedPassword && age >= 0 && age <= 30 * 60;
+  } catch (error) {
+    if (error instanceof SyntaxError || error instanceof TypeError) return false;
+    throw error;
+  }
+}
+
 function errorResponse(message: string, status: number) {
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
 }

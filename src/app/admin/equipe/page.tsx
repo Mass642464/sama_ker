@@ -11,6 +11,7 @@ const roleHelp: Record<string, string> = {
   commercial: "Prospects et agenda en écriture ; biens en lecture.",
   technique: "Biens en écriture ; aucun accès aux prospects.",
   direction: "Lecture seule des biens, prospects, agenda et journal.",
+  responsable_travaux: "Création et suivi des seuls chantiers qui lui sont affectés.",
 };
 
 export default function AdminTeamPage() {

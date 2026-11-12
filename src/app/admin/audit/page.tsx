@@ -20,6 +20,12 @@ const actionLabels: Record<string, string> = {
   "appointment.status": "Statut de rendez-vous modifié",
   "appointment.visit-change": "Suivi de visite modifié",
   "staff.upsert": "Accès de l’équipe modifié",
+  "work.project.create": "Chantier créé",
+  "work.project.update": "Chantier modifié",
+  "work.phase.update": "Avancement d’une phase modifié",
+  "work.update.create": "Brouillon de travaux créé",
+  "work.update.publish": "Mise à jour de travaux publiée",
+  "work.photo.upload": "Photo de chantier ajoutée",
 };
 
 const formatter = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" });

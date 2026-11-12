@@ -9,7 +9,7 @@ const reminderId = "5f5a8a3e-6f0e-4a0b-9f6d-2b7d1d4a9c11";
 
 const originalFetch = globalThis.fetch;
 const savedEnvironment = Object.fromEntries(
-  ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "ADMIN_EMAILS", "LISTING_REVIEWER_EMAILS", "GEOSPATIAL_PROFILE_ENABLED"].map((key) => [key, process.env[key]]),
+  ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "ADMIN_EMAILS", "LISTING_REVIEWER_EMAILS", "GEOSPATIAL_PROFILE_ENABLED", "CONSTRUCTION_WORK_ENABLED"].map((key) => [key, process.env[key]]),
 );
 
 // Annuaire de test : jeton -> adresse ; adresse -> rôle dans la table staff_members.
@@ -19,6 +19,7 @@ const tokens: Record<string, string> = {
   "token-technique-000000000": "tech@example.test",
   "token-direction-000000000": "dir@example.test",
   "token-responsable-0000000": "resp@example.test",
+  "token-travaux-000000000": "works@example.test",
   "token-inactif-00000000000": "inactif@example.test",
   "token-inconnu-00000000000": "inconnu@example.test",
 };
@@ -27,6 +28,7 @@ const staffTable: Record<string, { role: string; active: boolean }> = {
   "tech@example.test": { role: "technique", active: true },
   "dir@example.test": { role: "direction", active: true },
   "resp@example.test": { role: "responsable", active: true },
+  "works@example.test": { role: "responsable_travaux", active: true },
   "inactif@example.test": { role: "commercial", active: false },
 };
 
@@ -55,6 +57,15 @@ before(() => {
       return Response.json(Object.entries(staffTable).map(([mail, value]) => ({ email: mail, role: value.role, active: value.active, created_at: "2026-11-09T09:00:00Z" })));
     }
     if (url.includes("/rest/v1/property_listings?select=id,category")) return Response.json([{ id: leadId, category: "terrain" }]);
+    if (url.includes("/rest/v1/construction_work_projects?")) {
+      if (url.includes("id=eq.")) {
+        const id = /id=eq\.([^&]+)/.exec(url)?.[1];
+        const assignedTo = id === reminderId ? "agent@example.test" : "works@example.test";
+        return Response.json([{ id, assigned_to: assignedTo }]);
+      }
+      return Response.json([{ id: leadId, client_email: "client@example.test", assigned_to: "works@example.test", title: "Chantier test", description: "", created_at: "2026-11-09T09:00:00Z", updated_at: "2026-11-09T09:00:00Z" }]);
+    }
+    if (url.includes("/rest/v1/construction_work_phases") || url.includes("/rest/v1/construction_work_updates") || url.includes("/rest/v1/construction_work_photos")) return Response.json([]);
     if (url.includes("/rest/v1/listing_geospatial_profiles") && method === "GET") return Response.json([]);
     if (url.includes("/rest/v1/listing_geospatial_profiles") && method === "POST") return Response.json([{ revision: 1, updated_at: "2026-01-01T00:00:00Z" }]);
     if (url.includes("/rest/v1/crm_leads") && method === "GET") return Response.json(url.includes("id=eq.") ? [{ id: leadId }] : [{ id: leadId, full_name: "Prospect Test", email: "p@example.test", interest: "Demande", source: "Site web", message: "", pipeline_stage: "Nouveau", created_at: "2026-11-09T09:00:00Z", user_id: null, assigned_to: "agent@example.test" }]);
@@ -69,7 +80,7 @@ before(() => {
   };
 });
 
-beforeEach(() => { calls = []; });
+beforeEach(() => { calls = []; process.env.CONSTRUCTION_WORK_ENABLED = "false"; });
 
 after(() => {
   globalThis.fetch = originalFetch;
@@ -87,9 +98,9 @@ function send(token: string, path: string, method = "GET", body?: unknown) {
   }), allowed);
 }
 
-const as = (role: "admin" | "commercial" | "technique" | "direction" | "responsable") => ({
+const as = (role: "admin" | "commercial" | "technique" | "direction" | "responsable" | "travaux") => ({
   admin: "token-admin-0000000000000", commercial: "token-commercial-00000000", technique: "token-technique-000000000",
-  direction: "token-direction-000000000", responsable: "token-responsable-0000000",
+  direction: "token-direction-000000000", responsable: "token-responsable-0000000", travaux: "token-travaux-000000000",
 })[role];
 
 test("refuses accounts that are unknown, deactivated or unconfirmed", async () => {
@@ -107,6 +118,9 @@ test("the session reports the role and permissions resolved on the server", asyn
   const bootstrap = await (await send(as("admin"), "/api/admin/session")).json() as Record<string, unknown>;
   assert.equal(bootstrap.role, "admin");
   assert.equal(bootstrap.canReview, false);
+  const works = await (await send(as("travaux"), "/api/admin/session")).json() as Record<string, unknown>;
+  assert.equal(works.role, "responsable_travaux");
+  assert.deepEqual(works.permissions, ["work:read", "work:write"]);
 });
 
 test("enforces the permission matrix per role", async () => {
@@ -132,11 +146,36 @@ test("enforces the permission matrix per role", async () => {
     ["responsable", `${property}/approve`, "POST", 400],
     ["admin", `${property}/approve`, "POST", 403],
     ["admin", "/api/admin/staff", "GET", 200],
+    ["travaux", "/api/admin/leads", "GET", 403],
+    ["travaux", "/api/admin/work/projects", "GET", 503],
   ];
   for (const [role, path, method, expected] of cases) {
     const body = method === "GET" ? undefined : {};
     const response = await send(as(role as "admin"), path, method, body);
     assert.equal(response.status, expected, `${role} ${method} ${path}`);
+  }
+});
+
+test("construction manager is limited to assigned projects and cannot reassign them", async () => {
+  const oldFlag = process.env.CONSTRUCTION_WORK_ENABLED;
+  process.env.CONSTRUCTION_WORK_ENABLED = "true";
+  try {
+    const listed = await send(as("travaux"), "/api/admin/work/projects");
+    assert.equal(listed.status, 200);
+    assert.ok(calls.some((call) => call.url.includes("/rest/v1/construction_work_projects?") && call.url.includes("assigned_to=eq.works%40example.test")));
+
+    calls = [];
+    assert.equal((await send(as("travaux"), `/api/admin/work/projects/${reminderId}`, "PATCH", { title: "Changement interdit" })).status, 404);
+    assert.equal(calls.some((call) => call.method === "PATCH"), false);
+
+    calls = [];
+    assert.equal((await send(as("travaux"), `/api/admin/work/projects/${leadId}`, "PATCH", { assignedTo: "agent@example.test" })).status, 403);
+    assert.equal(calls.some((call) => call.method === "PATCH"), false);
+
+    assert.equal((await send(as("technique"), "/api/admin/work/projects")).status, 403);
+  } finally {
+    if (oldFlag === undefined) delete process.env.CONSTRUCTION_WORK_ENABLED;
+    else process.env.CONSTRUCTION_WORK_ENABLED = oldFlag;
   }
 });
 
@@ -223,7 +262,7 @@ test("schedules and completes follow-up reminders", async () => {
 test("only administrators manage the team, never their own access or bootstrap accounts", async () => {
   const roster = await (await send(as("admin"), "/api/admin/staff")).json() as Record<string, unknown>;
   assert.deepEqual(roster.bootstrap, [{ email: "boot@example.test", role: "admin", active: true, managedByEnvironment: true }]);
-  assert.equal((roster.members as unknown[]).length, 5);
+  assert.equal((roster.members as unknown[]).length, 6);
 
   assert.equal((await send(as("admin"), "/api/admin/staff", "PUT", { email: "Nouveau@Example.test", role: "commercial", active: true })).status, 200);
   const saved = calls.find((call) => call.url.includes("/rest/v1/staff_members?on_conflict=email") && call.method === "POST");

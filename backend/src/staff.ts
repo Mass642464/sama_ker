@@ -1,6 +1,6 @@
 import { databaseRequest, isRecord, type AdminConfig, type AdminUser } from "./admin";
 
-export type Role = "admin" | "responsable" | "commercial" | "technique" | "direction";
+export type Role = "admin" | "responsable" | "commercial" | "technique" | "direction" | "responsable_travaux";
 
 export type Permission =
   | "dashboard:read"
@@ -12,7 +12,10 @@ export type Permission =
   | "appointments:read"
   | "appointments:write"
   | "staff:manage"
-  | "audit:read";
+  | "audit:read"
+  | "work:read"
+  | "work:write"
+  | "work:assign";
 
 export const roleLabels: Record<Role, string> = {
   admin: "Administrateur",
@@ -20,16 +23,18 @@ export const roleLabels: Record<Role, string> = {
   commercial: "Agent commercial",
   technique: "Agent technique",
   direction: "Direction (lecture)",
+  responsable_travaux: "Responsable travaux",
 };
 
 // Le droit de valider une annonce (properties:review) n'est volontairement attribué qu'au rôle « responsable »
 // ou aux adresses de LISTING_REVIEWER_EMAILS : un administrateur ne valide pas ses propres modifications.
 export const rolePermissions: Record<Role, Permission[]> = {
-  admin: ["dashboard:read", "properties:read", "properties:write", "leads:read", "leads:write", "appointments:read", "appointments:write", "staff:manage", "audit:read"],
+  admin: ["dashboard:read", "properties:read", "properties:write", "leads:read", "leads:write", "appointments:read", "appointments:write", "staff:manage", "audit:read", "work:read", "work:write", "work:assign"],
   responsable: ["dashboard:read", "properties:read", "properties:review", "leads:read", "appointments:read"],
   commercial: ["dashboard:read", "properties:read", "leads:read", "leads:write", "appointments:read", "appointments:write"],
   technique: ["dashboard:read", "properties:read", "properties:write"],
   direction: ["dashboard:read", "properties:read", "leads:read", "appointments:read", "audit:read"],
+  responsable_travaux: ["work:read", "work:write"],
 };
 
 export const roleNames = Object.keys(rolePermissions) as Role[];

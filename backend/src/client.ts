@@ -1,5 +1,7 @@
 import { getAuthConfig, verifyUser } from "./user-auth";
 import { handleClientExtras } from "./client-extras";
+import { handleClientVault } from "./client-vault";
+import { handleClientConstructionWork } from "./construction-work";
 import { handleVisits } from "./visits";
 
 const stageStatuses: Record<string, string> = {
@@ -99,6 +101,10 @@ export async function handleClientRequest(request: Request, allowedOrigins: Set<
   }
   if (pathname.startsWith("/api/client/")) {
     const path = pathname.slice("/api/client/".length).split("/").filter(Boolean);
+    const vault = await handleClientVault(request, user, path, { baseUrl: auth.baseUrl, serviceRoleKey });
+    if (vault) return vault;
+    const work = await handleClientConstructionWork(user, path, { baseUrl: auth.baseUrl, serviceRoleKey });
+    if (work) return work;
     const extra = await handleClientExtras(request, user, path);
     if (extra) return extra;
   }

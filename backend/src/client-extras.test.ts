@@ -10,7 +10,7 @@ const alertId = "5f5a8a3e-6f0e-4a0b-9f6d-2b7d1d4a9c11";
 
 const originalFetch = globalThis.fetch;
 const savedEnvironment = Object.fromEntries(
-  ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"].map((key) => [key, process.env[key]]),
+  ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "CLIENT_VAULT_ENABLED", "CONSTRUCTION_WORK_ENABLED"].map((key) => [key, process.env[key]]),
 );
 
 let publishedSlugs = new Set<string>(["terrain-thies"]);
@@ -24,6 +24,8 @@ before(() => {
   process.env.SUPABASE_URL = "https://supabase.example.test";
   process.env.SUPABASE_ANON_KEY = "synthetic-anon-key";
   process.env.SUPABASE_SERVICE_ROLE_KEY = "synthetic-service-role-key";
+  process.env.CLIENT_VAULT_ENABLED = "false";
+  process.env.CONSTRUCTION_WORK_ENABLED = "false";
   globalThis.fetch = async (input, init) => {
     const url = String(input);
     const method = init?.method ?? "GET";
@@ -63,6 +65,8 @@ beforeEach(() => {
   erasureStatus = 200;
   authDeleteStatus = 200;
   calls = [];
+  process.env.CLIENT_VAULT_ENABLED = "false";
+  process.env.CONSTRUCTION_WORK_ENABLED = "false";
 });
 
 after(() => {
@@ -149,6 +153,18 @@ test("account deletion erases application data first, then the authentication ac
   assert.deepEqual(order.filter(Boolean), ["erase", "auth"]);
   const erase = calls.find((call) => call.url.includes("erase_client_account"));
   assert.deepEqual(erase?.body, { p_user: userId });
+});
+
+test("account deletion cleans enabled private modules before erasing records and auth", async () => {
+  process.env.CLIENT_VAULT_ENABLED = "true";
+  process.env.CONSTRUCTION_WORK_ENABLED = "true";
+  const response = await send("/api/client/account", "DELETE");
+  assert.equal(response.status, 200);
+  const vaultIndex = calls.findIndex((call) => call.url.includes("/rest/v1/client_vault_files"));
+  const workIndex = calls.findIndex((call) => call.url.includes("/rest/v1/construction_work_projects"));
+  const eraseIndex = calls.findIndex((call) => call.url.includes("erase_client_account"));
+  const authIndex = calls.findIndex((call) => call.url.includes("/auth/v1/admin/users/"));
+  assert.ok(vaultIndex >= 0 && workIndex > vaultIndex && eraseIndex > workIndex && authIndex > eraseIndex);
 });
 
 test("a failed authentication deletion is reported without hiding the erasure", async () => {

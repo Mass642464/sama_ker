@@ -19,7 +19,7 @@ function send(response: ServerResponse, result: Response, origin: string | null,
   if (origin && allowedOrigins.has(origin)) {
     response.setHeader("Access-Control-Allow-Origin", origin);
     response.setHeader("Access-Control-Allow-Methods", allowedMethods);
-    response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-File-Name");
     response.setHeader("Vary", "Origin");
   }
 
@@ -63,7 +63,7 @@ function readBody(request: IncomingMessage, maxBytes: number) {
 
 function toWebRequest(request: IncomingMessage, body: Buffer, binary = false) {
   const headers = new Headers();
-  for (const name of ["content-type", "content-length", "origin", "authorization"]) {
+  for (const name of ["content-type", "content-length", "origin", "authorization", "x-file-name"]) {
     const value = request.headers[name];
     if (typeof value === "string") headers.set(name, value);
   }
@@ -89,6 +89,8 @@ export function createBackendServer() {
     const isAdminRoute = requestPath === "/api/admin" || requestPath.startsWith("/api/admin/");
     const isClientRoute = requestPath === "/api/client" || requestPath.startsWith("/api/client/");
     const isPublicListingImageRoute = /^\/api\/public\/listing-images\/[^/]+$/.test(requestPath);
+    const isConstructionPhotoUpload = /^\/api\/admin\/work\/updates\/[^/]+\/photos$/.test(requestPath) && request.method === "POST";
+    const isClientVaultUpload = requestPath === "/api/client/vault/files" && request.method === "POST";
     const corsMethods = isAdminRoute ? "GET, POST, PATCH, PUT, DELETE, OPTIONS" : isClientRoute ? "GET, POST, DELETE, OPTIONS" : isPublicListingImageRoute ? "GET, OPTIONS" : "POST, OPTIONS";
 
     if (!isContactRoute && !isAdminRoute && !isClientRoute && !isPublicListingImageRoute) {
@@ -111,8 +113,8 @@ export function createBackendServer() {
     }
 
     const contentLength = Number(request.headers["content-length"] ?? 0);
-    const isFileUpload = isAdminRoute &&
-      ((requestPath === "/api/admin/files" || requestPath === "/api/admin/listing-images") && request.method === "POST");
+    const isFileUpload = isConstructionPhotoUpload || isClientVaultUpload || (isAdminRoute &&
+      ((requestPath === "/api/admin/files" || requestPath === "/api/admin/listing-images") && request.method === "POST"));
     const maxBodyBytes = isFileUpload ? MAX_FILE_BODY_BYTES : isAdminRoute ? MAX_ADMIN_BODY_BYTES : MAX_BODY_BYTES;
     if (!Number.isFinite(contentLength) || contentLength > maxBodyBytes) {
       send(response, Response.json({ error: "La demande dépasse la taille autorisée." }, { status: 413 }), origin, allowedOrigins, corsMethods);

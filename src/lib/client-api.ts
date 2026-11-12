@@ -15,6 +15,40 @@ function apiOrigin() {
   return url.origin;
 }
 
+export async function clientApi<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = await getAccessToken();
+  if (!token) throw new Error("Votre session a expiré. Reconnectez-vous.");
+  const url = new URL(path, `${apiOrigin()}/`);
+  if (url.origin !== new URL(apiOrigin()).origin || !url.pathname.startsWith("/api/client/")) {
+    throw new Error("La route de l’espace client demandée est invalide.");
+  }
+  const headers = new Headers(init.headers);
+  headers.set("Authorization", `Bearer ${token}`);
+  if (init.body && !(typeof Blob !== "undefined" && init.body instanceof Blob) && typeof init.body !== "string" && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(url, { ...init, headers, cache: "no-store" });
+  } catch {
+    throw new Error("Le service est injoignable pour le moment.");
+  }
+  if (response.status === 204) return undefined as T;
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch (reason) {
+    if (reason instanceof SyntaxError) throw new Error("Le service a renvoyé une réponse invalide.");
+    throw reason;
+  }
+  if (!response.ok) {
+    const body = typeof payload === "object" && payload !== null ? payload as Record<string, unknown> : {};
+    throw new Error(typeof body.error === "string" ? body.error : "L’opération n’a pas pu être terminée.");
+  }
+  return payload as T;
+}
+
 export async function getAccessToken() {
   const { data: { session }, error } = await createClient().auth.getSession();
   if (error) throw new Error("Votre session n’a pas pu être vérifiée.");
