@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, House, Map, Wrench } from "lucide-react";
+import { Building2, Compass, House, Map, Wrench } from "lucide-react";
 
 const links = [
   { href: "/", label: "Accueil", icon: House },
-  { href: "/terrains", label: "Parcel", icon: Compass },
+  { href: "/terrains", label: "Parcelle", icon: Compass },
+  { href: "/immobilier", label: "Immobilier", icon: Building2 },
   { href: "/services", label: "Services", icon: Wrench },
   { href: "/carte", label: "Carte", icon: Map },
 ] as const;

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import Link from "next/link";
 import { LoginForm } from "./login-form";
+import { SamaKeurLogo } from "@/components/sama-keur-logo";
 
 export const metadata: Metadata = {
   title: "Connexion administration",
@@ -18,7 +19,7 @@ export default async function AdminLoginPage() {
 
   return <main className="grid min-h-screen place-items-center bg-[#f5f7f5] p-5">
     <section className="w-full max-w-md rounded-2xl border border-[#e6ebe6] bg-white p-7 shadow-sm">
-      <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#60856c]">Sama Kër</p>
+      <Link href="/" aria-label="Sama Kër — accueil"><SamaKeurLogo/></Link>
       <h1 className="mt-2 text-2xl font-semibold text-[#18371d]">Administration</h1>
       <p className="mt-2 text-sm text-[#718078]">Connectez-vous avec un compte autorisé.</p>
       {configured

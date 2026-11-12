@@ -20,6 +20,7 @@ let authStatus = 200;
 let databaseStatus = 200;
 let leadRows: unknown[] = [];
 let appointmentRows: unknown[] = [];
+let visitRpcResult: unknown = true;
 let calls: { url: string; method: string; body: string | undefined }[] = [];
 
 before(() => {
@@ -35,6 +36,8 @@ before(() => {
       return Response.json({ id: userId, email: accountEmail, email_confirmed_at: confirmedAt });
     }
     if (url.includes("/rpc/consume_contact_request_rate_limit")) return new Response("true");
+    if (url.includes("/rpc/list_visit_workflows")) return Response.json([]);
+    if (url.includes("/rpc/transition_visit")) return Response.json(visitRpcResult);
     if (url.includes("/rest/v1/contact_requests")) return new Response(null, { status: 201 });
     if (databaseStatus !== 200) return new Response("{}", { status: databaseStatus });
     if (url.includes("/rest/v1/crm_leads")) return Response.json(leadRows);
@@ -50,6 +53,7 @@ beforeEach(() => {
   databaseStatus = 200;
   leadRows = [];
   appointmentRows = [];
+  visitRpcResult = true;
   calls = [];
 });
 
@@ -122,10 +126,10 @@ test("client space hides database failures and unknown routes", async () => {
   assert.equal((await handleClientRequest(clientRequest(bearer, "/api/client/other"), allowedOrigins)).status, 404);
 });
 
-function contactRequest(headers: Record<string, string> = {}) {
+function contactRequest(headers: Record<string, string> = {}, extra: Record<string, unknown> = {}) {
   const body = JSON.stringify({
     name: "Client Test", email: "saisi@example.test", subject: "visit", message: "Je souhaite visiter ce bien.",
-    propertyReference: "T-1", consent: true,
+    propertyReference: "T-1", consent: true, ...extra,
   });
   return new Request("http://backend.local/api/contact", {
     method: "POST",
@@ -158,4 +162,44 @@ test("an invalid or unconfirmed session is rejected instead of downgraded to ano
   confirmedAt = null;
   assert.equal((await handleContactRequest(contactRequest(bearer), allowedOrigins)).status, 403);
   assert.equal(calls.some((call) => call.url.includes("/rest/v1/contact_requests")), false);
+});
+
+test("visit proposals require a verified account and a valid future timestamp", async () => {
+  const future = new Date(Date.now() + 86_400_000);
+  future.setUTCSeconds(0, 0);
+  const input = { visitStartsAt: future.toISOString() };
+  assert.equal((await handleContactRequest(contactRequest({}, input), allowedOrigins, true)).status, 401);
+  assert.equal((await handleContactRequest(contactRequest(bearer), allowedOrigins, true)).status, 400);
+  assert.equal((await handleContactRequest(contactRequest(bearer, { visitStartsAt: "2000-01-01T10:00:00.000Z" }), allowedOrigins, true)).status, 400);
+  assert.equal((await handleContactRequest(contactRequest(bearer, { ...input, subject: "property" }), allowedOrigins, true)).status, 400);
+  assert.equal(calls.some((call) => call.url.endsWith("/rest/v1/contact_requests")), false);
+
+  const response = await handleContactRequest(contactRequest(bearer, input), allowedOrigins, true);
+  assert.equal(response.status, 201);
+  const stored = JSON.parse(calls.find((call) => call.url.endsWith("/rest/v1/contact_requests"))?.body ?? "{}") as Record<string, unknown>;
+  assert.equal(stored.visit_starts_at, input.visitStartsAt);
+  assert.equal(stored.user_id, userId);
+});
+
+test("visit actions are scoped to the verified account and validate actions, dates and revisions", async () => {
+  const future = new Date(Date.now() + 86_400_000);
+  future.setUTCSeconds(0, 0);
+  const send = (body: unknown, headers: Record<string, string> = bearer) => handleClientRequest(new Request(`http://backend.local/api/client/visits/${leadId}`, {
+    method: "POST", headers: { origin, "content-type": "application/json", ...headers }, body: JSON.stringify(body),
+  }), allowedOrigins);
+  assert.equal((await send({ action: "request_cancel", revision: 1 }, {})).status, 401);
+  assert.equal((await send({ action: "confirm", revision: 1 })).status, 400);
+  assert.equal((await send({ action: "request_reschedule", revision: 1, proposedAt: "2000-01-01T10:00:00.000Z" })).status, 400);
+  assert.equal((await send({ action: "accept_offer", revision: 0 })).status, 400);
+  assert.equal(calls.some((call) => call.url.includes("/rpc/transition_visit")), false);
+
+  assert.equal((await send({ action: "request_reschedule", revision: 2, proposedAt: future.toISOString() })).status, 200);
+  const stored = JSON.parse(calls.find((call) => call.url.includes("/rpc/transition_visit"))?.body ?? "{}") as Record<string, unknown>;
+  assert.deepEqual(stored, { p_appointment: leadId, p_user: userId, p_action: "request_reschedule", p_proposed: future.toISOString(), p_revision: 2 });
+  visitRpcResult = false;
+  assert.equal((await send({ action: "accept_offer", revision: 2 })).status, 409);
+
+  assert.equal((await handleClientRequest(clientRequest(bearer, "/api/client/visits"), allowedOrigins)).status, 200);
+  const list = JSON.parse(calls.find((call) => call.url.includes("/rpc/list_visit_workflows"))?.body ?? "{}") as Record<string, unknown>;
+  assert.equal(list.p_user, userId);
 });

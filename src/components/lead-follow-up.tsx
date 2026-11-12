@@ -42,10 +42,16 @@ export function LeadFollowUp({ lead, onChanged }: Props) {
     setError("");
     try {
       await action();
-      await onChanged();
+      try {
+        await onChanged();
+      } catch {
+        setError("L’action a été enregistrée, mais l’actualisation a échoué. Rechargez la page.");
+      }
       setRefresh((value) => value + 1);
+      return true;
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "L’action n’a pas pu être effectuée.");
+      return false;
     } finally {
       setBusy(false);
     }
@@ -55,10 +61,10 @@ export function LeadFollowUp({ lead, onChanged }: Props) {
     event.preventDefault();
     const form = event.currentTarget;
     const body = String(new FormData(form).get("body") ?? "").trim();
-    await run(async () => {
+    const saved = await run(async () => {
       await adminApi(`/api/admin/leads/${lead.id}/events`, { method: "POST", body: JSON.stringify({ kind: "note", body }) });
     });
-    form.reset();
+    if (saved) form.reset();
   }
 
   async function addReminder(event: FormEvent<HTMLFormElement>) {
@@ -67,13 +73,13 @@ export function LeadFollowUp({ lead, onChanged }: Props) {
     const data = new FormData(form);
     const day = String(data.get("dueDate") ?? "");
     const note = String(data.get("note") ?? "").trim();
-    await run(async () => {
+    const saved = await run(async () => {
       await adminApi(`/api/admin/leads/${lead.id}/reminders`, {
         method: "POST",
-        body: JSON.stringify({ dueAt: new Date(`${day}T09:00:00`).toISOString(), note }),
+        body: JSON.stringify({ dueAt: new Date(`${day}T09:00:00Z`).toISOString(), note }),
       });
     });
-    form.reset();
+    if (saved) form.reset();
   }
 
   return <div className="mt-2">
@@ -97,7 +103,7 @@ export function LeadFollowUp({ lead, onChanged }: Props) {
       </form>}
 
       {canWrite && <form onSubmit={addReminder} className="grid gap-2 sm:grid-cols-[auto_1fr_auto] sm:items-end">
-        <label className="font-semibold text-[#52655b]">Relancer le
+        <label className="font-semibold text-[#52655b]">Relancer le (9 h, Sénégal)
           <input name="dueDate" type="date" required disabled={busy} className="mt-1 block rounded-lg border border-[#e5eae5] bg-white p-1.5 font-normal"/>
         </label>
         <label className="font-semibold text-[#52655b]">Motif

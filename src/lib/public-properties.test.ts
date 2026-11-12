@@ -67,6 +67,13 @@ describe("mapPublicListings", () => {
     assert.match(property.priceLabel, /\/ mois$/);
   });
 
+  it("uses only a valid publication date and never treats publication as verification", () => {
+    const [dated] = mapPublicListings([{ ...publishedListing, published_at: "2026-11-10T12:00:00Z", verified: true }]);
+    assert.equal(dated.publishedAt, "2026-11-10T12:00:00Z");
+    assert.equal(dated.verified, false);
+    assert.equal(mapPublicListings([{ ...publishedListing, published_at: "invalid" }])[0].publishedAt, undefined);
+  });
+
   it("maps an approximate public location only when both coordinates are valid", () => {
     assert.equal(mapPublicListings([publishedListing])[0].coordinates, undefined);
     const [located] = mapPublicListings([{ ...publishedListing, public_latitude: "14.79", public_longitude: "-16.93" }]);

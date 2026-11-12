@@ -7,6 +7,7 @@ import { ArrowRight, ArrowUpRight, Building2, ChevronLeft, ChevronRight, Compass
 import { PageShell } from "@/components/page-shell";
 import { PropertyCard } from "@/components/property-card";
 import type { Property } from "@/lib/properties";
+import { useDataSaver } from "@/components/data-saver";
 
 const categories = [
   { label: "Acheter", href: "/immobilier" },
@@ -27,6 +28,7 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
   const [showcasePaused, setShowcasePaused] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const dataSaver = useDataSaver();
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -37,16 +39,16 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
   }, []);
 
   useEffect(() => {
-    if (showcasePaused || reducedMotion) return;
+    if (showcasePaused || reducedMotion || dataSaver) return;
     const timer = window.setInterval(() => setActiveSlide((slide) => (slide + 1) % 2), 6500);
     return () => window.clearInterval(timer);
-  }, [showcasePaused, reducedMotion]);
+  }, [showcasePaused, reducedMotion, dataSaver]);
 
   return (
     <PageShell>
       <div className="container">
         <section className="pb-7 pt-8 sm:pb-10 sm:pt-12">
-          <div className={`home-showcase relative isolate overflow-hidden rounded-[26px] bg-[#172a26] p-5 sm:p-8 ${showcasePaused || reducedMotion ? "home-showcase--paused" : ""}`}>
+          <div className={`home-showcase relative isolate overflow-hidden rounded-[26px] bg-[#174c38] p-5 sm:p-8 ${showcasePaused || reducedMotion || dataSaver ? "home-showcase--paused" : ""}`}>
             <Image
               src="/images/parcel.jpg"
               alt=""
@@ -54,23 +56,23 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
               sizes="(max-width: 640px) 100vw, 1240px"
               className={`home-showcase__image object-cover ${activeSlide === 0 ? "home-showcase__image--active" : ""}`}
             />
-            <Image
+            {(!dataSaver || activeSlide === 1) && <Image
               src="/images/immobilier2%20(2).jpg"
               alt=""
               fill
               sizes="(max-width: 640px) 100vw, 1240px"
               className={`home-showcase__image object-cover ${activeSlide === 1 ? "home-showcase__image--active" : ""}`}
-            />
+            />}
             <div className="home-showcase__shade absolute inset-0" aria-hidden="true"/>
             <div className="relative z-10">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="text-[9px] font-bold uppercase tracking-[.17em] text-white/80">Sama Kër · Sénégal</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[.17em] text-[#e2c893]">Immobilier &amp; expertise géospatiale · Sénégal</span>
                   <h1 className="mt-3 max-w-[700px] text-[clamp(2rem,5vw,3.8rem)] font-semibold leading-[1.04] tracking-[-.045em] text-white">
-                    Un projet immobilier ?<br className="hidden sm:block"/> Trouvons le bon point de départ.
+                    Votre projet mérite<br className="hidden sm:block"/> une vision du territoire.
                   </h1>
                   <p className="mt-3 max-w-xl text-sm leading-6 text-white/85 sm:mt-4 sm:text-base">
-                    Terrains, logements et expertise locale, réunis au même endroit.
+                    Terrains, immobilier et accompagnement géospatial : explorez les possibilités avec Sama Kër.
                   </p>
                 </div>
               </div>
@@ -97,10 +99,10 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
                   <span className="sr-only">Rechercher un bien ou un lieu</span>
                   <input name="localisation" placeholder="Ville, quartier ou type de bien…" className="h-10 w-full bg-transparent text-xs text-[#242a26] outline-none placeholder:text-[#999f9a] sm:text-sm"/>
                 </label>
-                <Link href="/terrains" aria-label="Filtres avancés" className="grid size-10 shrink-0 place-items-center rounded-full bg-[#f0f2f0] text-[#515b54] hover:bg-[#e3ebe3]">
+                <Link href="/terrains" aria-label="Filtres avancés" className="grid size-10 shrink-0 place-items-center rounded-full bg-[#f5f1e8] text-[#515b54] hover:bg-[#e3ebe3]">
                   <SlidersHorizontal size={16}/>
                 </Link>
-                <button type="submit" className="grid size-10 shrink-0 place-items-center rounded-full bg-[#111411] text-white hover:bg-[#43884c] sm:flex sm:w-auto sm:gap-2 sm:px-5">
+                <button type="submit" className="grid size-10 shrink-0 place-items-center rounded-full bg-[#174c38] text-white hover:bg-[#24674d] sm:flex sm:w-auto sm:gap-2 sm:px-5">
                   <Search size={15}/>
                   <span className="hidden text-xs font-semibold sm:inline">Rechercher</span>
                   <span className="sr-only sm:hidden">Rechercher</span>
@@ -120,15 +122,15 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
               >
                 <ChevronLeft size={17} aria-hidden="true"/>
               </button>
-              <button
+              {!dataSaver && <button
                 type="button"
                 aria-label={showcasePaused ? "Reprendre le diaporama" : "Mettre le diaporama en pause"}
                 aria-pressed={showcasePaused}
                 onClick={() => setShowcasePaused((paused) => !paused)}
-                className="home-showcase__motion-control grid size-10 place-items-center rounded-full border border-white/50 bg-white text-[#172a26] shadow-lg"
+                className="home-showcase__motion-control grid size-10 place-items-center rounded-full border border-white/50 bg-white text-[#174c38] shadow-lg"
               >
                 {showcasePaused ? <Play size={16} aria-hidden="true"/> : <Pause size={16} aria-hidden="true"/>}
-              </button>
+              </button>}
               <button
                 type="button"
                 aria-label="Afficher la photo suivante"
@@ -156,7 +158,7 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
               <span className="eyebrow">À découvrir</span>
-              <h2 className="mt-1.5 text-xl font-semibold tracking-tight text-[#172a26] sm:text-2xl">Des lieux pour vos projets</h2>
+              <h2 className="mt-1.5 text-xl font-semibold tracking-tight text-[#174c38] sm:text-2xl">Des lieux pour vos projets</h2>
             </div>
             <Link href="/terrains" className="inline-flex items-center gap-1.5 pb-1 text-[10px] font-semibold text-[#4c8551] sm:text-xs">
               Tout voir <ArrowRight size={14}/>
@@ -201,10 +203,10 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
         <section className="mb-8 grid gap-4 rounded-[26px] bg-[#e9ede8] p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:p-7">
           <div>
             <span className="eyebrow">L’accompagnement Sama Kër</span>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#172a26] sm:text-2xl">Du terrain à la maison, à votre rythme.</h2>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#174c38] sm:text-2xl">Du terrain à la maison, à votre rythme.</h2>
             <p className="mt-2 max-w-xl text-xs leading-5 text-[#6e7770]">GéoSpatia Consulting réunit immobilier, construction et savoir-faire géospatial dans un même parcours.</p>
           </div>
-          <Link href="/services" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#111411] px-5 text-xs font-semibold text-white transition hover:bg-[#43884c]">
+          <Link href="/services" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#174c38] px-5 text-xs font-semibold text-white transition hover:bg-[#24674d]">
             Découvrir les services <ArrowRight size={14}/>
           </Link>
         </section>

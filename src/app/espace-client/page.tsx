@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { ClientAccountDeletion, ClientFollowUp, type CatalogEntry } from "@/components/client-follow-up";
 import { ClientRequests } from "@/components/client-requests";
+import { ClientVisits } from "@/components/client-visits";
 import { ContactForm } from "@/components/contact-form";
 import { PageShell } from "@/components/page-shell";
 import { isClientSpaceConfigured } from "@/lib/client-space";
@@ -49,6 +50,7 @@ export default async function ClientSpacePage() {
     <section className="container grid gap-10 py-12 lg:grid-cols-[1.1fr_.9fr]">
       <div className="space-y-12">
         <ClientRequests/>
+        {process.env.NEXT_PUBLIC_VISIT_AGENDA_ENABLED === "true" && <ClientVisits/>}
         <ClientFollowUp catalog={catalog}/>
       </div>
       <div className="space-y-10">

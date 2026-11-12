@@ -6,6 +6,8 @@ import { can, resolveStaff, roleLabels, writeAudit, type AuditDetails, type Perm
 import { handleAudit, handleStaff } from "./team";
 import { handleFiles } from "./files";
 import { addAdminImagePreviews, handleListingImageDelete, handleListingImageUpload } from "./listing-images";
+import { handleVisits } from "./visits";
+import { handleGeospatialProfile } from "./geospatial-profile";
 
 const uuidPattern = /^[0-9a-f-]{36}$/i;
 // Seuls ces champs techniques du corps de la requête peuvent figurer dans le journal : jamais un message, une note ou un nom.
@@ -22,10 +24,12 @@ function requiredPermission(resource: string, method: string, path: string[]): P
     case "leads": return read ? "leads:read" : "leads:write";
     case "reminders": return read ? "leads:read" : "leads:write";
     case "appointments": return read ? "appointments:read" : "appointments:write";
+    case "visits": return read ? "appointments:read" : "appointments:write";
     case "staff": return "staff:manage";
     case "audit": return "audit:read";
     case "files": return read ? "properties:read" : "properties:write";
     case "listing-images": return method === "POST" || method === "DELETE" ? "properties:write" : undefined;
+    case "geospatial-profile": return read ? "properties:read" : "properties:write";
     default: return undefined;
   }
 }
@@ -44,6 +48,7 @@ function auditAction(resource: string, method: string, path: string[], body: Rec
   }
   if (resource === "reminders") return "reminder.done";
   if (resource === "appointments") return method === "POST" ? "appointment.create" : "appointment.status";
+  if (resource === "visits") return "appointment.visit-change";
   if (resource === "staff") return "staff.upsert";
   if (resource === "files") return method === "DELETE" ? "file.delete" : "file.upload";
   if (resource === "listing-images") return method === "DELETE" ? "listing-image.delete" : "listing-image.upload";
@@ -98,7 +103,7 @@ export async function handleAdminRequest(request: Request, allowedOrigins: Set<s
 
   const mutating = request.method !== "GET";
   // Les envois de fichiers ne sont jamais relus pour le journal : seul le nom d'action est consigné.
-  const snapshot = mutating && resource !== "files" && resource !== "listing-images" ? request.clone() : null;
+  const snapshot = mutating && resource !== "files" && resource !== "listing-images" && resource !== "geospatial-profile" ? request.clone() : null;
 
   let response: Response;
   if (resource === "properties") {
@@ -118,6 +123,8 @@ export async function handleAdminRequest(request: Request, allowedOrigins: Set<s
   else if (resource === "leads") response = await handleLeads(request, config, path, staff, user);
   else if (resource === "reminders") response = await handleReminders(request, config, path);
   else if (resource === "appointments") response = await handleAppointments(request, config, path, user);
+  else if (resource === "visits") response = await handleVisits(request, config, path, null);
+  else if (resource === "geospatial-profile") response = await handleGeospatialProfile(request, config, path);
   else if (resource === "staff") response = await handleStaff(request, config, path, staff);
   else if (resource === "audit") response = await handleAudit(request, config, path);
   else if (resource === "files") response = await handleFiles(request, config, path, user);

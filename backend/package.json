@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node --env-file-if-exists=.env dist/server.js",
-    "test": "npm run build && node --test dist/contact.test.js dist/admin.test.js dist/client.test.js dist/client-extras.test.js dist/roles.test.js dist/files.test.js dist/listing-images.test.js"
+    "test": "npm run build && node --test dist/contact.test.js dist/admin.test.js dist/client.test.js dist/client-extras.test.js dist/roles.test.js dist/files.test.js dist/listing-images.test.js dist/geospatial-profile.test.js"
   },
   "devDependencies": {
     "@types/node": "^20",

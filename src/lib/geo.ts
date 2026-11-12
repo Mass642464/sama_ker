@@ -1,4 +1,12 @@
 export type GeoPoint = { lat: number; lng: number };
+export type MapBounds = { north: number; south: number; east: number; west: number };
+
+export function isInMapBounds(point: GeoPoint, bounds: MapBounds) {
+  const longitudeInBounds = bounds.west <= bounds.east
+    ? point.lng >= bounds.west && point.lng <= bounds.east
+    : point.lng >= bounds.west || point.lng <= bounds.east;
+  return point.lat >= bounds.south && point.lat <= bounds.north && longitudeInBounds;
+}
 
 const earthRadiusKm = 6371;
 

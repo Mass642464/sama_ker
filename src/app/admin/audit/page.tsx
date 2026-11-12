@@ -18,6 +18,7 @@ const actionLabels: Record<string, string> = {
   "reminder.done": "Relance terminée",
   "appointment.create": "Rendez-vous créé",
   "appointment.status": "Statut de rendez-vous modifié",
+  "appointment.visit-change": "Suivi de visite modifié",
   "staff.upsert": "Accès de l’équipe modifié",
 };
 

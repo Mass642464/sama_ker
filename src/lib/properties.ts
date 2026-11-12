@@ -1,3 +1,5 @@
+import { normalizeSearch, parseSearchQuery } from "./search-query";
+
 export type Property = {
   slug: string;
   ref: string;
@@ -18,6 +20,7 @@ export type Property = {
   features: string[];
   photos?: PropertyPhoto[];
   coordinates?: PropertyCoordinates;
+  publishedAt?: string;
 };
 
 // Position approximative (arrondie à environ 1 km), validée par l'équipe avant publication.
@@ -94,6 +97,7 @@ export function getPropertyHref(property: Property) {
 
 export type PropertySearchParams = {
   page?: string;
+  q?: string;
   localisation?: string;
   region?: string;
   budget?: string;
@@ -107,7 +111,7 @@ export type PropertySearchParams = {
 };
 
 function normalized(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr").trim();
+  return normalizeSearch(value);
 }
 
 function numericFilter(value: string | undefined, fallback: number) {
@@ -117,6 +121,7 @@ function numericFilter(value: string | undefined, fallback: number) {
 }
 
 export function filterProperties(listings: Property[], params: PropertySearchParams) {
+  const parsed = parseSearchQuery(params.q ?? "");
   const location = normalized(params.localisation ?? "");
   const region = normalized(params.region ?? "");
   const type = normalized(params.type ?? "");
@@ -125,6 +130,14 @@ export function filterProperties(listings: Property[], params: PropertySearchPar
   const minArea = numericFilter(params.surfaceMin, 0);
   const maxArea = numericFilter(params.surfaceMax, Infinity);
   const filtered = listings.filter((property) =>
+    !parsed.unsupportedProximity &&
+    (!parsed.category || property.category === parsed.category) &&
+    (!parsed.localisation || normalized(property.location).includes(parsed.localisation) || normalized(property.region).includes(parsed.localisation)) &&
+    (parsed.prixMin === undefined || property.price >= parsed.prixMin) &&
+    (parsed.prixMax === undefined || property.price <= parsed.prixMax) &&
+    (parsed.surfaceMin === undefined || property.area >= parsed.surfaceMin) &&
+    (parsed.surfaceMax === undefined || property.area <= parsed.surfaceMax) &&
+    parsed.keywords.every((word) => normalized([property.title, property.ref, property.location, property.region, property.kind, property.description, ...property.features].join(" ")).includes(word)) &&
     (!location || normalized(property.location).includes(location)) &&
     (!region || normalized(property.region) === region) &&
     (!type || normalized(property.kind).includes(type)) &&
@@ -134,6 +147,14 @@ export function filterProperties(listings: Property[], params: PropertySearchPar
   );
 
   switch (params.tri) {
+    case "pertinence": {
+      const score = (property: Property) => parsed.keywords.reduce((total, word) =>
+        total + (normalized(property.title).includes(word) ? 4 : 0) +
+        (normalized(`${property.kind} ${property.ref} ${property.location} ${property.region}`).includes(word) ? 2 : 0) +
+        (normalized(`${property.description} ${property.features.join(" ")}`).includes(word) ? 1 : 0), 0);
+      return filtered.sort((left, right) => score(right) - score(left));
+    }
+    case "nouveautes": return filtered.sort((left, right) => (right.publishedAt ?? "").localeCompare(left.publishedAt ?? ""));
     case "prix-croissant": return filtered.sort((left, right) => left.price - right.price);
     case "prix-decroissant": return filtered.sort((left, right) => right.price - left.price);
     case "surface-croissante": return filtered.sort((left, right) => left.area - right.area);

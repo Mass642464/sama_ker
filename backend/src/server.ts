@@ -85,7 +85,7 @@ export function createBackendServer() {
   return createServer(async (request, response) => {
     const origin = typeof request.headers.origin === "string" ? request.headers.origin : null;
     const requestPath = request.url?.split("?")[0] ?? "";
-    const isContactRoute = requestPath === contactPath;
+    const isContactRoute = requestPath === contactPath || requestPath === "/api/contact/visits";
     const isAdminRoute = requestPath === "/api/admin" || requestPath.startsWith("/api/admin/");
     const isClientRoute = requestPath === "/api/client" || requestPath.startsWith("/api/client/");
     const isPublicListingImageRoute = /^\/api\/public\/listing-images\/[^/]+$/.test(requestPath);
@@ -135,7 +135,7 @@ export function createBackendServer() {
         result = config
           ? await handlePublicListingImage(webRequest, config, new URL(webRequest.url).pathname.split("/").filter(Boolean).slice(3))
           : jsonError("Le stockage des photos n’est pas configuré.", 503);
-      } else result = await handleContactRequest(webRequest, allowedOrigins);
+      } else result = await handleContactRequest(webRequest, allowedOrigins, requestPath === "/api/contact/visits");
       send(response, result, origin, allowedOrigins, corsMethods);
     } catch (error) {
       console.error("Sama Kër API request failed", error instanceof Error ? error.message : "unknown error");

@@ -467,10 +467,12 @@ export async function handleAppointments(request: Request, config: NonNullable<R
     if (input instanceof Response) return input;
     if (!isRecord(input) || typeof input.status !== "string" || !appointmentStatuses.has(input.status) ||
       Object.keys(input).length !== 1) return jsonError("Statut de rendez-vous invalide.", 400);
-    return patchOne(config, `admin_appointments?id=eq.${path[0]}&select=id`, {
+    const updated = await patchOne(config, `admin_appointments?id=eq.${path[0]}&select=id`, {
       status: input.status,
       updated_at: new Date().toISOString(),
     });
+    if (updated.status === 400) return jsonError("Modification refusée. Pour les visites du calendrier public, utilisez le suivi des demandes de visite.", 409);
+    return updated;
   }
   return jsonError("Route introuvable.", 404);
 }

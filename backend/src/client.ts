@@ -1,5 +1,6 @@
 import { getAuthConfig, verifyUser } from "./user-auth";
 import { handleClientExtras } from "./client-extras";
+import { handleVisits } from "./visits";
 
 const stageStatuses: Record<string, string> = {
   "Nouveau": "received",
@@ -89,6 +90,10 @@ export async function handleClientRequest(request: Request, allowedOrigins: Set<
   if (user instanceof Response) return user;
 
   const { pathname } = new URL(request.url);
+  if (pathname === "/api/client/visits" || pathname.startsWith("/api/client/visits/")) {
+    const path = pathname.slice("/api/client/visits".length).split("/").filter(Boolean);
+    return handleVisits(request, { baseUrl: auth.baseUrl, serviceRoleKey }, path, user.id);
+  }
   if (pathname === "/api/client/requests" && request.method === "GET") {
     return listRequests({ baseUrl: auth.baseUrl, serviceRoleKey }, user.id);
   }

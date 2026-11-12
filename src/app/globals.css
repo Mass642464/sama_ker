@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f1f2f1;
-  --foreground: #171a18;
-  --forest: #172a26;
-  --green: #5a965b;
-  --muted: #777e79;
+  --background: #eae6dc;
+  --foreground: #263238;
+  --forest: #174c38;
+  --green: #174c38;
+  --gold: #c59b52;
+  --cream: #f5f1e8;
+  --muted: #626d66;
 }
 
 @layer base {
@@ -24,7 +26,7 @@
   a { color: inherit; text-decoration: none; }
   button, input, select { font: inherit; }
 
-  :focus-visible { outline: 3px solid #4f9157; outline-offset: 3px; }
+  :focus-visible { outline: 3px solid #a17229; outline-offset: 3px; }
 
   ::selection { background: #dcebdc; color: var(--forest); }
 }
@@ -34,9 +36,9 @@
     width: min(1600px, calc(100% - 48px));
     margin: 22px auto;
     overflow: hidden;
-    border: 1px solid #e7e9e7;
-    border-radius: 24px;
-    background: #f7f8f7;
+    border: 1px solid #e3dccf;
+    border-radius: 18px;
+    background: var(--cream);
     box-shadow: 0 18px 70px rgba(20, 32, 24, .08);
   }
 
@@ -57,7 +59,7 @@
   .admin-field:focus { border-color: #589262; }
   textarea.admin-field { resize: vertical; }
 
-  .eyebrow { color: #518558; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .eyebrow { color: var(--forest); font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
   .section-space { padding-block: 86px; }
   .property-art { position: relative; isolation: isolate; overflow: hidden; background: linear-gradient(145deg, #b8cec3, #718f7d 54%, #3a6040); }
   .property-art::before { content: ""; position: absolute; z-index: -1; inset: 0; opacity: .22; background-image: linear-gradient(28deg, transparent 47%, #fff 48%, transparent 49%), linear-gradient(145deg, transparent 47%, #fff 48%, transparent 49%); background-size: 90px 70px, 115px 82px; }
@@ -157,10 +159,10 @@
     .site-frame { width: 100%; min-height: 100vh; margin: 0 auto; border: 0; border-radius: 0; padding-bottom: calc(82px + env(safe-area-inset-bottom)); box-shadow: none; }
     .section-space { padding-block: 38px; }
     .site-frame > footer { padding-bottom: 30px; }
-    .mobile-app-nav { position: fixed; z-index: 60; right: 16px; bottom: calc(12px + env(safe-area-inset-bottom)); left: 16px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; max-width: 440px; margin-inline: auto; padding: 7px; border: 1px solid rgba(255,255,255,.16); border-radius: 24px; background: rgba(18, 21, 19, .96); box-shadow: 0 10px 34px rgba(0,0,0,.2); backdrop-filter: blur(18px); }
+    .mobile-app-nav { position: fixed; z-index: 60; right: 16px; bottom: calc(12px + env(safe-area-inset-bottom)); left: 16px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; max-width: 440px; margin-inline: auto; padding: 7px; border: 1px solid rgba(255,255,255,.16); border-radius: 24px; background: rgba(23, 76, 56, .97); box-shadow: 0 10px 34px rgba(0,0,0,.2); backdrop-filter: blur(18px); }
     .mobile-app-nav__link { display: flex; min-width: 0; min-height: 48px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 18px; color: #c7cbc8; font-size: 9px; font-weight: 650; }
-    .mobile-app-nav__link--active { background: #fff; color: #171a18; }
-    .mobile-app-nav__link--active svg { color: #518b51; }
+    .mobile-app-nav__link--active { background: #f5f1e8; color: #174c38; }
+    .mobile-app-nav__link--active svg { color: #174c38; }
   }
 
   @media (min-width: 641px) and (max-width: 900px) {

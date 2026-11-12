@@ -18,6 +18,8 @@
     "src/lib/pagination.ts",
     "src/lib/pagination.test.ts",
     "src/lib/geo.ts",
-    "src/lib/geo.test.ts"
+    "src/lib/geo.test.ts",
+    "src/lib/property-share.ts",
+    "src/lib/property-share.test.ts"
   ]
 }

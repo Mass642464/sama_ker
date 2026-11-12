@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Clock3, MapPin, Plus, Video, X } from "lucide-react";
 import { adminApi, type AdminAppointment } from "@/lib/admin-api";
+import { AdminVisits } from "@/components/admin-visits";
 
 const dayLabels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
@@ -124,6 +125,10 @@ export default function AdminAgendaPage() {
             const starts = new Date(appointment.starts_at);
             return <article key={appointment.id} className="grid grid-cols-[64px_1fr] gap-4 p-4 sm:grid-cols-[72px_1fr_auto] sm:items-center"><span className="flex items-center gap-1.5 text-[10px] font-bold text-[#61736a]"><Clock3 size={12}/>{new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" }).format(starts)}</span><div className="flex gap-3"><span className="mt-1 h-9 w-1 shrink-0 rounded-full bg-[#88ad91]"/><div><h3 className="text-[11px] font-bold text-[#354b40]">{appointment.purpose}</h3><p className="mt-1 text-[9px] text-[#89948d]">{appointment.contact_name} · <a className="text-[#589262]" href={`mailto:${appointment.contact_email}`}>{appointment.contact_email}</a></p><span className="mt-2 inline-flex items-center gap-1 text-[8px] text-[#849188]">{appointment.purpose.toLowerCase().includes("visio") ? <Video size={11}/> : <MapPin size={11}/>} {appointment.location || "Lieu à confirmer"}</span></div></div><label className="col-start-2 text-[8px] text-[#849188] sm:col-start-auto">Statut<select aria-label={`Statut rendez-vous ${appointment.contact_name}`} value={appointment.status} onChange={(event) => changeStatus(appointment, event.target.value)} className="ml-2 rounded-full bg-[#eef4ee] px-2 py-1.5 text-[9px] font-semibold text-[#477052]"><option>À confirmer</option><option>Confirmé</option><option>Annulé</option></select></label></article>;
           })}</div>}</section>
+    {process.env.NEXT_PUBLIC_VISIT_AGENDA_ENABLED === "true" && <AdminVisits onUpdated={async () => {
+      try { await refresh(); }
+      catch (reason) { setError(reason instanceof Error ? reason.message : "L’agenda n’a pas pu être actualisé."); }
+    }}/>}
     {adding && <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[#17251bcc] p-4"><section role="dialog" aria-modal="true" aria-labelledby="appointment-form-title" className="my-auto w-full max-w-lg rounded-2xl bg-white p-6"><div className="flex items-center justify-between"><h2 id="appointment-form-title" className="text-lg font-semibold text-[#18371d]">Planifier un rendez-vous</h2><button type="button" onClick={() => setAdding(false)} aria-label="Fermer"><X size={18}/></button></div><form onSubmit={createAppointment} className="mt-4 space-y-3">
       <label className="block text-xs font-semibold text-[#52655b]">Nom du contact<input name="contactName" required minLength={2} maxLength={120} className="admin-field"/></label>
       <label className="block text-xs font-semibold text-[#52655b]">E-mail<input name="contactEmail" type="email" required maxLength={254} className="admin-field"/></label>

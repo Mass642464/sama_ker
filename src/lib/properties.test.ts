@@ -1,11 +1,48 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { filterProperties, properties, type Property } from "./properties";
+import { parseSearchQuery } from "./search-query";
 
 const terrains = properties.filter((property) => property.category === "terrain");
 const homes = properties.filter((property) => property.category === "immobilier");
 
 describe("filterProperties", () => {
+  it("interprets a natural language search and combines it with filters", () => {
+    const q = "Terrain de 300 à 500 m² à Saly, avec un budget inférieur à 15 millions FCFA.";
+    const parsed = parseSearchQuery(q);
+    assert.equal(parsed.category, "terrain");
+    assert.equal(parsed.localisation, "saly");
+    assert.equal(parsed.surfaceMin, 300);
+    assert.equal(parsed.surfaceMax, 500);
+    assert.equal(parsed.prixMax, 14_999_999);
+    assert.deepEqual(parsed.keywords, []);
+    const listings = [
+      { ...terrains[1], ref: "MATCH", price: 14_000_000, area: 300 },
+      { ...terrains[1], ref: "LIMIT", price: 15_000_000, area: 500 },
+      { ...terrains[1], ref: "AREA", price: 10_000_000, area: 501 },
+    ];
+    assert.deepEqual(filterProperties(listings, { q }).map((property) => property.ref), ["MATCH"]);
+    assert.deepEqual(filterProperties(listings, { q, prixMax: "13000000" }), []);
+  });
+
+  it("matches free keywords and refuses unsupported proximity searches", () => {
+    assert.deepEqual(filterProperties(homes, { q: "villa jardin" }).map((property) => property.ref), ["I-0042"]);
+    assert.deepEqual(filterProperties(terrains, { q: "terrain proche d'une école" }), []);
+    assert.equal(parseSearchQuery("terrain proche d'une école").unsupportedProximity, true);
+  });
+
+  it("orders real listings by publication date", () => {
+    const listings = [{ ...terrains[0], publishedAt: "2026-01-01T00:00:00Z" }, { ...terrains[1], publishedAt: "2026-02-01T00:00:00Z" }];
+    assert.deepEqual(filterProperties(listings, { tri: "nouveautes" }).map((property) => property.ref), ["T-0186", "T-0142"]);
+  });
+
+  it("ranks keyword matches in titles above matches only in descriptions", () => {
+    const listings = [
+      { ...terrains[0], ref: "DESCRIPTION", title: "Terrain résidentiel", description: "Jardin arboré" },
+      { ...terrains[1], ref: "TITLE", title: "Terrain avec jardin", description: "Parcelle résidentielle" },
+    ];
+    assert.deepEqual(filterProperties(listings, { q: "jardin", tri: "pertinence" }).map((property) => property.ref), ["TITLE", "DESCRIPTION"]);
+  });
   it("normalizes accents, case, and surrounding whitespace for location and region", () => {
     const byLocation = filterProperties(terrains, { localisation: "  THIAPONG " });
     const byRegion = filterProperties(terrains, { region: "thies" });

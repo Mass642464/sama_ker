@@ -133,6 +133,7 @@ export function mapPublicListings(value: unknown): Property[] {
       description,
       features: featureList,
       photos: media,
+      ...(typeof item.published_at === "string" && !Number.isNaN(Date.parse(item.published_at)) ? { publishedAt: item.published_at } : {}),
       ...(coordinates ? { coordinates } : {}),
     };
   });
@@ -198,7 +199,7 @@ export async function getPropertyCatalog(): Promise<{ properties: Property[]; is
   const url = new URL("/rest/v1/property_listings", baseUrl);
   url.searchParams.set(
     "select",
-    "slug,reference,category,title,region,location_label,price_amount,price_period,area_m2,property_type,availability_status,description,features,public_latitude,public_longitude,property_listing_media(image_url,alt_text,credit,source_url,position)",
+    "slug,reference,category,title,region,location_label,price_amount,price_period,area_m2,property_type,availability_status,description,features,public_latitude,public_longitude,published_at,property_listing_media(image_url,alt_text,credit,source_url,position)",
   );
   url.searchParams.set("property_listing_media.order", "position.asc");
   url.searchParams.set("publication_status", "eq.published");

@@ -81,7 +81,7 @@ async function readBoundedBody(request: Request) {
   return new TextDecoder().decode(body);
 }
 
-export async function handleContactRequest(request: Request, allowedOrigins = getAllowedOrigins()) {
+export async function handleContactRequest(request: Request, allowedOrigins = getAllowedOrigins(), requireVisit = false) {
   const origin = request.headers.get("origin");
   if (!origin || !allowedOrigins.has(origin)) {
     return jsonError("Origine de la demande non autorisée.", 403);
@@ -120,6 +120,14 @@ export async function handleContactRequest(request: Request, allowedOrigins = ge
   const subject = typeof input.subject === "string" ? input.subject : "";
   const message = typeof input.message === "string" ? input.message.trim() : "";
   const propertyReference = typeof input.propertyReference === "string" ? input.propertyReference.trim() : "";
+  const visitStartsAt = input.visitStartsAt;
+  if (requireVisit && visitStartsAt === undefined) return jsonError("La date de visite est requise.", 400);
+  if (visitStartsAt !== undefined && (subject !== "visit" || !propertyReference ||
+    typeof visitStartsAt !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00\.000Z$/.test(visitStartsAt) ||
+    !Number.isFinite(Date.parse(visitStartsAt)) || new Date(visitStartsAt).toISOString() !== visitStartsAt ||
+    Date.parse(visitStartsAt) <= Date.now())) {
+    return jsonError("La date de visite est invalide ou passée.", 400);
+  }
   if (input.propertyReference !== undefined && input.propertyReference !== null && typeof input.propertyReference !== "string") {
     return jsonError("La référence du bien est invalide.", 400);
   }
@@ -157,6 +165,7 @@ export async function handleContactRequest(request: Request, allowedOrigins = ge
     if (verified instanceof Response) return verified;
     account = verified;
   }
+  if (visitStartsAt !== undefined && !account) return jsonError("Connectez-vous pour demander une visite.", 401);
 
   const payload: ContactPayload = {
     name,
@@ -214,6 +223,7 @@ export async function handleContactRequest(request: Request, allowedOrigins = ge
         property_reference: payload.propertyReference,
         consented_at: new Date().toISOString(),
         ...(account ? { user_id: account.id } : {}),
+        ...(typeof visitStartsAt === "string" ? { visit_starts_at: visitStartsAt } : {}),
       }),
       cache: "no-store",
     });

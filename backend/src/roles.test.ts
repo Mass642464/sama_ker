@@ -9,7 +9,7 @@ const reminderId = "5f5a8a3e-6f0e-4a0b-9f6d-2b7d1d4a9c11";
 
 const originalFetch = globalThis.fetch;
 const savedEnvironment = Object.fromEntries(
-  ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "ADMIN_EMAILS", "LISTING_REVIEWER_EMAILS"].map((key) => [key, process.env[key]]),
+  ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "ADMIN_EMAILS", "LISTING_REVIEWER_EMAILS", "GEOSPATIAL_PROFILE_ENABLED"].map((key) => [key, process.env[key]]),
 );
 
 // Annuaire de test : jeton -> adresse ; adresse -> rôle dans la table staff_members.
@@ -54,10 +54,15 @@ before(() => {
       if (url.includes("email=eq.")) return Response.json(row?.active ? [{ role: row.role }] : []);
       return Response.json(Object.entries(staffTable).map(([mail, value]) => ({ email: mail, role: value.role, active: value.active, created_at: "2026-11-09T09:00:00Z" })));
     }
+    if (url.includes("/rest/v1/property_listings?select=id,category")) return Response.json([{ id: leadId, category: "terrain" }]);
+    if (url.includes("/rest/v1/listing_geospatial_profiles") && method === "GET") return Response.json([]);
+    if (url.includes("/rest/v1/listing_geospatial_profiles") && method === "POST") return Response.json([{ revision: 1, updated_at: "2026-01-01T00:00:00Z" }]);
     if (url.includes("/rest/v1/crm_leads") && method === "GET") return Response.json(url.includes("id=eq.") ? [{ id: leadId }] : [{ id: leadId, full_name: "Prospect Test", email: "p@example.test", interest: "Demande", source: "Site web", message: "", pipeline_stage: "Nouveau", created_at: "2026-11-09T09:00:00Z", user_id: null, assigned_to: "agent@example.test" }]);
     if (url.includes("/rest/v1/lead_events") && method === "GET") return Response.json([{ id: "e1", at: "2026-11-09T09:00:00Z", actor_email: "agent@example.test", kind: "note", body: "Note interne" }]);
     if (url.includes("/rest/v1/lead_reminders") && method === "GET") return Response.json([{ id: reminderId, lead_id: leadId, due_at: "2026-11-10T09:00:00Z", note: "Rappeler", assigned_to: "agent@example.test" }]);
     if (url.includes("/rest/v1/audit_log") && method === "GET") return Response.json([{ id: 7, at: "2026-11-09T09:00:00Z", actor_email: "boot@example.test", action: "lead.stage", entity: "leads", entity_id: leadId, details: { pipelineStage: "À qualifier" } }]);
+    if (url.includes("/rpc/list_visit_workflows")) return Response.json([]);
+    if (url.includes("/rpc/transition_visit")) return Response.json(true);
     if (method === "PATCH") return Response.json([{ id: leadId }]);
     if (method === "GET") return Response.json([]);
     return new Response(null, { status: 201 });
@@ -110,10 +115,14 @@ test("enforces the permission matrix per role", async () => {
     ["commercial", "/api/admin/leads", "GET", 200],
     ["commercial", "/api/admin/properties", "GET", 200],
     ["commercial", property, "PATCH", 403],
+    ["commercial", `/api/admin/geospatial-profile/${leadId}`, "PUT", 403],
     ["commercial", "/api/admin/staff", "GET", 403],
     ["commercial", "/api/admin/audit", "GET", 403],
     ["technique", "/api/admin/leads", "GET", 403],
     ["technique", "/api/admin/appointments?from=2026-11-01&to=2026-12-01", "GET", 403],
+    ["technique", "/api/admin/visits", "GET", 403],
+    ["direction", "/api/admin/visits", "GET", 200],
+    ["direction", `/api/admin/visits/${leadId}`, "POST", 403],
     ["technique", "/api/admin/properties", "GET", 200],
     ["direction", "/api/admin/leads", "GET", 200],
     ["direction", "/api/admin/leads/" + leadId, "PATCH", 403],
@@ -129,6 +138,33 @@ test("enforces the permission matrix per role", async () => {
     const response = await send(as(role as "admin"), path, method, body);
     assert.equal(response.status, expected, `${role} ${method} ${path}`);
   }
+});
+
+test("private geospatial profiles require authenticated staff and write permission", async () => {
+  process.env.GEOSPATIAL_PROFILE_ENABLED = "true";
+  try {
+    const path = `/api/admin/geospatial-profile/${leadId}`;
+    assert.equal((await send("token-inconnu-00000000000", path)).status, 403);
+    assert.equal((await send("invalid", path)).status, 401);
+    assert.equal((await send(as("commercial"), path, "PUT", {})).status, 403);
+    assert.equal((await send(as("technique"), path)).status, 200);
+    const profile = { area: null, location: null, latitude: { value: "14.5", source: "source sensible", date: "2026-01-01", reliability: "declared" }, longitude: { value: "-17", source: "source sensible", date: "2026-01-01", reliability: "declared" }, zone: null, access: null, environment: null, geometry: null };
+    assert.equal((await send(as("technique"), path, "PUT", { revision: 0, profile })).status, 200);
+    const audit = calls.filter((call) => call.url.includes("/rest/v1/audit_log") && call.method === "POST");
+    assert.equal(audit.length, 1);
+    assert.equal(JSON.stringify(audit[0].body).includes("source sensible"), false);
+    assert.deepEqual(audit[0].body?.details, {});
+  } finally { delete process.env.GEOSPATIAL_PROFILE_ENABLED; }
+});
+
+test("only staff with appointment write permission can respond to a visit", async () => {
+  const endpoint = `/api/admin/visits/${leadId}`;
+  assert.equal((await send(as("commercial"), endpoint, "POST", { action: "accept_offer", revision: 1 })).status, 400);
+  assert.equal((await send(as("commercial"), endpoint, "POST", { action: "accept_cancel", revision: 1 })).status, 200);
+  const rpc = calls.find((call) => call.url.includes("/rpc/transition_visit"));
+  assert.equal(rpc?.body?.p_user, null);
+  assert.equal(rpc?.body?.p_action, "accept_cancel");
+  assert.equal((await send(as("direction"), endpoint, "POST", { action: "accept_cancel", revision: 1 })).status, 403);
 });
 
 test("lists leads with their assignee and records stage changes in the lead history", async () => {

@@ -9,7 +9,9 @@ export const metadata: Metadata = { title: "Maisons, appartements et locations",
 export default async function ImmobilierPage({ searchParams }: { searchParams: Promise<PropertySearchParams> }) {
   const params = await searchParams;
   const { properties, isDemo } = await getPropertyCatalog();
-  const filtered = filterProperties(properties.filter((property) => property.category === "immobilier"), params);
+  const catalog = properties.filter((property) => property.category === "immobilier");
+  const regions = [...new Set(catalog.map((property) => property.region))].sort((left, right) => left.localeCompare(right, "fr"));
+  const filtered = filterProperties(catalog, params);
   const pageResult = paginate(filtered, parsePage(params.page));
-  return <CatalogView title="Immobilier au Sénégal" intro="Maisons, appartements et opportunités immobilières : explorez les biens et échangez avec un conseiller pour organiser une visite." properties={pageResult.items} kind="immobilier" isDemo={isDemo} {...params} pagination={{ page: pageResult.page, pageCount: pageResult.pageCount, total: pageResult.total, basePath: "/immobilier", params }}/>;
+  return <CatalogView title="Immobilier au Sénégal" intro="Maisons, appartements et opportunités immobilières : explorez les biens et échangez avec un conseiller pour organiser une visite." properties={pageResult.items} kind="immobilier" isDemo={isDemo} regions={regions} {...params} pagination={{ page: pageResult.page, pageCount: pageResult.pageCount, total: pageResult.total, basePath: "/immobilier", params }}/>;
 }
