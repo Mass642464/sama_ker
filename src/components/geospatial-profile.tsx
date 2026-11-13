@@ -94,7 +94,7 @@ export function GeospatialProfile({ listingId }: { listingId: string }) {
 
   return <section className="rounded-2xl border border-[#e6ebe6] bg-white p-4 sm:p-6">
     <p className="rounded-xl bg-[#f7f1e7] p-4 text-xs leading-5 text-[#775d34]">
-      Fiche interne distincte de l’annonce. Ne renseignez que des données autorisées, avec leur provenance. « Vérifiée » est une appréciation saisie par l’équipe, pas une certification cadastrale ou juridique. Les données précises ne sont pas affichées sur Google Maps.
+      Fiche interne distincte de l’annonce. Ne renseignez que des données autorisées, avec leur provenance. « Vérifiée » est une appréciation saisie par l’équipe, pas une certification cadastrale ou juridique. Les données précises ne sont pas affichées sur la carte publique.
     </p>
     {!enabled && <p role="status" className="mt-4 rounded-lg bg-[#edf4ed] p-3 text-xs leading-5 text-[#43584e]">Aperçu désactivé : la saisie et l’enregistrement exigent la migration, les protections et une recette avant activation. N’y saisissez aucune donnée réelle.</p>}
     {loading && <p role="status" className="mt-4 text-xs text-[#718078]">Chargement de la fiche…</p>}

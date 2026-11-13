@@ -189,36 +189,55 @@ function parseCoordinate(value: unknown, range: readonly [number, number]): numb
   return Math.round(value * 100) / 100;
 }
 
-function validateListing(value: unknown): ListingInput | null {
-  if (!isRecord(value)) return null;
+type ListingValidation = { listing: ListingInput } | { error: string };
+
+function validateListing(value: unknown): ListingValidation {
+  if (!isRecord(value)) return { error: "Les champs de l’annonce sont invalides." };
   const {
     ref, title, category, region, location, price, pricePeriod, area, kind, status,
     description, features, publicationStatus, photos,
   } = value;
   const latitude = parseCoordinate(value.latitude, latitudeRange);
   const longitude = parseCoordinate(value.longitude, longitudeRange);
-  if (latitude === undefined || longitude === undefined || (latitude === null) !== (longitude === null)) return null;
-  if (!validString(ref, 2, 40) || !validString(title, 5, 140) ||
-    typeof category !== "string" || !categories.has(category) ||
-    !validString(region, 2, 80) || !validString(location, 2, 100) ||
-    typeof price !== "number" || !Number.isSafeInteger(price) || price <= 0 ||
-    (pricePeriod !== "total" && pricePeriod !== "monthly") ||
-    typeof area !== "number" || !Number.isFinite(area) || area <= 0 || area > 99_999_999 ||
-    !validString(kind, 2, 80) || typeof status !== "string" || !propertyStatuses.has(status) ||
-    !validString(description, 20, 2000) || !Array.isArray(features) || features.length > 12 ||
-    !features.every((feature) => validString(feature, 1, 120)) ||
-    typeof publicationStatus !== "string" || !publicationStatuses.has(publicationStatus) ||
-    !Array.isArray(photos) || photos.length > 12) return null;
+  if (latitude === undefined || longitude === undefined || (latitude === null) !== (longitude === null)) {
+    return { error: "Les coordonnées sont invalides : indiquez latitude et longitude ensemble, dans la zone autorisée." };
+  }
+  if (!validString(ref, 2, 40)) return { error: "La référence doit contenir 2 à 40 caractères, sans compter les espaces au début et à la fin." };
+  if (!validString(title, 5, 140)) return { error: "Le titre doit contenir 5 à 140 caractères, sans compter les espaces au début et à la fin." };
+  if (typeof category !== "string" || !categories.has(category)) return { error: "Choisissez une catégorie valide." };
+  if (!validString(region, 2, 80)) return { error: "La région doit contenir 2 à 80 caractères, sans compter les espaces au début et à la fin." };
+  if (!validString(location, 2, 100)) return { error: "La localisation générale doit contenir 2 à 100 caractères, sans compter les espaces au début et à la fin." };
+  if (typeof price !== "number" || !Number.isSafeInteger(price) || price <= 0) return { error: "Le prix doit être un nombre entier positif en FCFA, inférieur ou égal à 9 007 199 254 740 991." };
+  if (pricePeriod !== "total" && pricePeriod !== "monthly") return { error: "Choisissez une période du prix valide." };
+  if (typeof area !== "number" || !Number.isFinite(area) || area <= 0 || area > 99_999_999) return { error: "La surface doit être positive et ne pas dépasser 99 999 999 m²." };
+  if (!validString(kind, 2, 80)) return { error: "Le type de bien doit contenir 2 à 80 caractères, sans compter les espaces au début et à la fin." };
+  if (typeof status !== "string" || !propertyStatuses.has(status)) return { error: "Choisissez une disponibilité valide." };
+  if (!validString(description, 20, 2000)) return { error: "La description doit contenir 20 à 2 000 caractères, sans compter les espaces au début et à la fin." };
+  if (!Array.isArray(features)) return { error: "La liste des caractéristiques est invalide." };
+  if (features.length > 12) return { error: "Saisissez au maximum 12 caractéristiques." };
+  const invalidFeature = features.findIndex((feature) => !validString(feature, 1, 120));
+  if (invalidFeature !== -1) return { error: `La caractéristique ${invalidFeature + 1} doit contenir 1 à 120 caractères.` };
+  if (typeof publicationStatus !== "string" || !publicationStatuses.has(publicationStatus)) return { error: "Choisissez un statut de publication valide." };
+  if (!Array.isArray(photos)) return { error: "La liste des médias de l’annonce est invalide." };
+  if (photos.length > 12) return { error: "Une annonce peut contenir au maximum 12 médias." };
 
   const parsedPhotos: ListingPhoto[] = [];
-  for (const photo of photos) {
-    if (!isRecord(photo) || !validString(photo.src, 1, 2048) ||
-      !validString(photo.alt, 10, 240) || !validString(photo.credit, 2, 160) ||
-      (photo.sourceUrl !== "" && !validString(photo.sourceUrl, 1, 2048))) return null;
+  for (const [index, photo] of photos.entries()) {
+    const number = index + 1;
+    if (!isRecord(photo)) return { error: `Le média ${number} est invalide.` };
+    if (!validString(photo.src, 1, 2048)) return { error: `Le média ${number} n’a pas d’adresse valide.` };
+    if (!validString(photo.alt, 10, 240)) return { error: `Le média ${number} : le texte alternatif doit contenir 10 à 240 caractères.` };
+    if (!validString(photo.credit, 2, 160)) return { error: `Le média ${number} : le crédit doit contenir 2 à 160 caractères.` };
+    if (photo.sourceUrl !== "" && !validString(photo.sourceUrl, 1, 2048)) {
+      return { error: `Le média ${number} : l’URL source doit être une adresse HTTPS valide.` };
+    }
     try {
       const src = new URL(photo.src);
       const sourceUrl = photo.sourceUrl ? new URL(String(photo.sourceUrl)) : null;
-      if (src.protocol !== "https:" || (sourceUrl && sourceUrl.protocol !== "https:")) return null;
+      if (src.protocol !== "https:") return { error: `Le média ${number} : son adresse doit utiliser HTTPS.` };
+      if (sourceUrl && sourceUrl.protocol !== "https:") {
+        return { error: `Le média ${number} : l’URL source doit commencer par https://.` };
+      }
       parsedPhotos.push({
         src: src.toString(),
         alt: photo.alt.trim(),
@@ -226,11 +245,11 @@ function validateListing(value: unknown): ListingInput | null {
         sourceUrl: sourceUrl?.toString() ?? "",
       });
     } catch {
-      return null;
+      return { error: `Le média ${number} contient une URL invalide.` };
     }
   }
 
-  return {
+  return { listing: {
     ref: ref.trim(),
     title: title.trim(),
     category: category as ListingInput["category"],
@@ -247,7 +266,7 @@ function validateListing(value: unknown): ListingInput | null {
     photos: parsedPhotos,
     latitude,
     longitude,
-  };
+  } };
 }
 
 function slugify(value: string) {
@@ -378,8 +397,9 @@ export async function handleProperties(request: Request, config: NonNullable<Ret
   if (path.length === 0 && request.method === "POST") {
     const input = await readJson(request);
     if (input instanceof Response) return input;
-    const listing = validateListing(input);
-    if (!listing) return jsonError("Vérifiez les champs de l’annonce et des médias.", 400);
+    const validation = validateListing(input);
+    if ("error" in validation) return jsonError(validation.error, 400);
+    const { listing } = validation;
     if (listing.publicationStatus === "published") return jsonError("La publication exige l’approbation d’un responsable distinct.", 403);
     const slug = `${slugify(listing.title)}-${slugify(listing.ref)}`.replace(/^-|-$/g, "").slice(0, 120);
     const saved = await saveListing(config, null, listing, user, slug);
@@ -399,8 +419,9 @@ export async function handleProperties(request: Request, config: NonNullable<Ret
       });
     }
 
-    const listing = validateListing(input);
-    if (!listing) return jsonError("Vérifiez les champs de l’annonce et des médias.", 400);
+    const validation = validateListing(input);
+    if ("error" in validation) return jsonError(validation.error, 400);
+    const { listing } = validation;
     if (listing.publicationStatus === "published") return jsonError("La publication exige l’approbation d’un responsable distinct.", 403);
     return saveListing(config, path[0], listing, user);
   }

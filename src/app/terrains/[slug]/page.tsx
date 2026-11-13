@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Check, FileLock2, Flag, MapPin, Ruler, Share2, Video } from "lucide-react";
 import { ContactForm } from "@/components/contact-form";
-import { GoogleMapPanel } from "@/components/google-map-panel";
+import { CesiumMapPanel } from "@/components/cesium-map-panel";
 import { FavoriteButton } from "@/components/favorite-button";
 import { PageShell } from "@/components/page-shell";
 import { PropertyCard } from "@/components/property-card";
@@ -96,7 +96,7 @@ export async function PropertyDetailPage({ params, category = "terrain" }: { par
           <section className="mt-6 rounded-2xl border border-[#e7e0d4] bg-white p-5 sm:p-7">
             <h2 className="text-xl font-semibold text-[#174c38]">Informations géographiques</h2>
             <p className="mt-3 text-sm leading-6 text-[#52655b]">Région : <strong>{property.region}</strong>. Les coordonnées exactes et les limites de parcelle ne sont pas publiées sur cette fiche.</p>
-            <div className="mt-5"><GoogleMapPanel region={property.region} markers={property.coordinates ? [{ id: property.slug, title: property.title, detail: `${property.priceLabel} · ${property.status}`, href, lat: property.coordinates.lat, lng: property.coordinates.lng }] : []} heightClassName="h-[280px]" note={property.coordinates ? "Le repère indique une zone d’environ 1 km validée par l’équipe, pas l’emplacement exact du bien." : "Vue générale de la région : aucun repère n’indique l’emplacement du bien."}/></div>
+            <div className="mt-5"><CesiumMapPanel region={property.region} markers={property.coordinates ? [{ id: property.slug, title: property.title, detail: `${property.priceLabel} · ${property.status}`, href, lat: property.coordinates.lat, lng: property.coordinates.lng }] : []} heightClassName="h-[280px]" note={property.coordinates ? "Le repère indique une zone d’environ 1 km validée par l’équipe, pas l’emplacement exact du bien." : "Vue générale de la région : aucun repère n’indique l’emplacement du bien."}/></div>
           </section>
         </div>
 

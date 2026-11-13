@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, MapPin, Search } from "lucide-react";
-import { GoogleMapPanel, type MapMarker } from "@/components/google-map-panel";
+import { CesiumMapPanel, type MapMarker } from "@/components/cesium-map-panel";
 import { formatApproximateDistance, isInMapBounds, sortByDistance, type GeoPoint, type MapBounds } from "@/lib/geo";
 import { parseSearchQuery } from "@/lib/search-query";
 import { parseGeoJson, parseKml, type ImportedGeoJson } from "@/lib/geometry-import";
@@ -83,7 +83,7 @@ export function PropertyMapExplorer({ properties, regions, query, isDemo, filter
 
   return <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
     <div className="min-w-0">
-      <GoogleMapPanel regions={regions} locate markers={markers} focusId={focus.id} focusNonce={focus.nonce} onLocate={setOrigin} onSearchArea={setBounds} autoFit={!bounds} importedGeometry={imported} heightClassName="h-[360px] sm:h-[580px]"/>
+      <CesiumMapPanel regions={regions} locate markers={markers} focusId={focus.id} focusNonce={focus.nonce} onLocate={setOrigin} onSearchArea={setBounds} autoFit={!bounds} importedGeometry={imported} heightClassName="h-[360px] sm:h-[580px]"/>
       <section className="mt-4 rounded-2xl border border-[#e7e0d4] bg-white p-4 sm:p-5">
         <h2 className="text-sm font-bold text-[#174c38]">Importer des géométries</h2>
         <p className="mt-2 text-xs leading-5 text-[#596b61]">GeoJSON ou KML en WGS 84, 2 Mo maximum. Points, lignes et polygones sont affichés temporairement. Les données ne sont ni enregistrées ni publiées par Sama Kër. Si la carte est affichée, les géométries apparaissent sur le fond Google.</p>
@@ -93,7 +93,7 @@ export function PropertyMapExplorer({ properties, regions, query, isDemo, filter
         </div>
         {importing && <p role="status" className="mt-3 text-xs text-[#596b61]">Lecture du fichier…</p>}
         {importError && <p role="alert" className="mt-3 text-xs text-red-700">{importError}{imported ? " Le fichier précédent reste chargé." : ""}</p>}
-        {imported && <p role="status" className="mt-3 text-xs text-[#174c38]">{imported.features.length} géométrie(s) chargée(s) localement pour la carte Google Maps.</p>}
+        {imported && <p role="status" className="mt-3 text-xs text-[#174c38]">{imported.features.length} géométrie(s) chargée(s) localement pour la carte 3D.</p>}
       </section>
     </div>
 

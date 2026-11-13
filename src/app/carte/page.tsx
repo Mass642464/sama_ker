@@ -6,7 +6,7 @@ import { filterProperties, type PropertySearchParams } from "@/lib/properties";
 
 export const metadata: Metadata = {
   title: "Carte des biens",
-  description: "Explorez le Sénégal sur une carte Google Maps : les biens dont la zone a été validée sont repérés de façon approximative.",
+  description: "Explorez les biens au Sénégal sur une carte 3D : seules les zones approximatives validées sont repérées.",
 };
 
 export default async function MapPage({ searchParams }: { searchParams: Promise<PropertySearchParams & { category?: string }> }) {

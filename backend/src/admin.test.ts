@@ -200,6 +200,64 @@ test("saves listing fields and photos atomically through the database function",
   assert.equal(JSON.parse(lastDatabaseRequest?.body ?? "{}").p_property_id, listingId);
 });
 
+test("rejects listing and media fields that violate the server constraints", async () => {
+  const listing = {
+    ref: "T-TEST-04",
+    title: "Annonce synthétique valide",
+    category: "terrain",
+    region: "Thiès",
+    location: "Zone générale de test",
+    price: 18_500_000,
+    pricePeriod: "total",
+    area: 300,
+    kind: "Terrain de test",
+    status: "Disponible",
+    description: "Description synthétique réservée aux tests automatisés.",
+    features: ["Donnée synthétique"],
+    publicationStatus: "draft",
+    photos: [{
+      src: "https://example.com/illustration-test.jpg",
+      alt: "Illustration synthétique réservée aux tests",
+      credit: "Fichier de test",
+      sourceUrl: "",
+    }],
+  };
+  const invalidCases = [
+    { fields: { ref: " A " }, error: /référence.*2 à 40/ },
+    { fields: { title: "Test" }, error: /titre.*5 à 140/ },
+    { fields: { category: "autre" }, error: /catégorie/ },
+    { fields: { region: "T" }, error: /région.*2 à 80/ },
+    { fields: { location: "X" }, error: /localisation générale.*2 à 100/ },
+    { fields: { price: 0 }, error: /prix.*entier positif/ },
+    { fields: { price: 1.5 }, error: /prix.*entier positif/ },
+    { fields: { pricePeriod: "week" }, error: /période du prix/ },
+    { fields: { area: 100_000_000 }, error: /surface/ },
+    { fields: { kind: "x" }, error: /type de bien.*2 à 80/ },
+    { fields: { status: "Autre" }, error: /disponibilité/ },
+    { fields: { description: "trop courte" }, error: /description.*20 à 2 000/ },
+    { fields: { features: Array.from({ length: 13 }, (_, index) => `Caractéristique ${index + 1}`) }, error: /maximum 12 caractéristiques/ },
+    { fields: { features: ["valide", "x".repeat(121)] }, error: /caractéristique 2.*120/ },
+    { fields: { publicationStatus: "autre" }, error: /statut de publication/ },
+    { fields: { photos: [{ ...listing.photos[0], alt: "Court" }] }, error: /média 1.*texte alternatif/ },
+    { fields: { photos: [{ ...listing.photos[0], credit: "x" }] }, error: /média 1.*crédit/ },
+    { fields: { photos: [{ ...listing.photos[0], sourceUrl: "http://example.com/source" }] }, error: /média 1.*https/ },
+    { fields: { latitude: 14.79 }, error: /coordonnées sont invalides/ },
+  ];
+  const callsBefore = databaseCalls;
+  for (const { fields, error } of invalidCases) {
+    for (const [path, method] of [["/api/admin/properties", "POST"], [`/api/admin/properties/${listingId}`, "PATCH"]]) {
+      const response = await handleAdminRequest(
+        request(path, method, accessToken, { ...listing, ...fields }),
+        new Set([origin]),
+      );
+      assert.equal(response.status, 400, JSON.stringify(fields));
+      const payload = await response.json() as { error: string };
+      assert.match(payload.error, error);
+    }
+  }
+  assert.equal(databaseCalls, callsBefore);
+});
+
 test("stores only a rounded public location inside the Senegal bounds, both values or none", async () => {
   const base = {
     ref: "T-TEST-03", title: "Annonce synthétique localisée", category: "terrain", region: "Thiès", location: "Zone générale de test",

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, ArrowUpRight, Copy, Download, Eye, MapPin, Pencil, Plus, Search, SlidersHorizontal, Trash2, Upload, X } from "lucide-react";
 import { adminApi, type AdminListing, type AdminListingPhoto, type ListingDraft } from "@/lib/admin-api";
-import { GoogleMapPanel, type MapMarker } from "@/components/google-map-panel";
+import { CesiumMapPanel, type MapMarker } from "@/components/cesium-map-panel";
 import { useAdminSession } from "@/components/admin-session";
 
 type LocalPhoto = {
@@ -162,6 +162,7 @@ function ListingForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (step !== 2 || busy) return;
     const invalid = Array.from(event.currentTarget.elements).find((element): element is HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement =>
       (element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) && !element.checkValidity());
     if (invalid) {
@@ -169,6 +170,22 @@ function ListingForm({
       setStep(Number(section?.dataset.formStep ?? 0));
       setError("Vérifiez les champs obligatoires de cette étape avant d’enregistrer.");
       window.setTimeout(() => { invalid.focus(); invalid.reportValidity(); }, 0);
+      return;
+    }
+    if (draft.description.trim().length < 20) {
+      setStep(1);
+      setError("La description doit contenir au moins 20 caractères utiles.");
+      return;
+    }
+    const features = featureText.split("\n").map((item) => item.trim()).filter(Boolean);
+    if (features.length > 12 || features.some((feature) => feature.length > 120)) {
+      setStep(1);
+      setError("Saisissez au maximum 12 caractéristiques, de 120 caractères chacune.");
+      return;
+    }
+    if ((draft.latitude === null) !== (draft.longitude === null)) {
+      setStep(1);
+      setError("Renseignez les deux coordonnées approximatives ou laissez les deux champs vides.");
       return;
     }
     setBusy(true);
@@ -194,7 +211,7 @@ function ListingForm({
         ...draft,
         price: Number(draft.price),
         area: Number(draft.area),
-        features: featureText.split("\n").map((item) => item.trim()).filter(Boolean),
+        features,
         photos: [...draft.photos, ...uploadedPhotos],
       };
       await adminApi(`/api/admin/properties${listing && !duplicate ? `/${listing.id}` : ""}`, {
@@ -231,17 +248,21 @@ function ListingForm({
       <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#60856c]">Catalogue</p><h2 id="listing-form-title" className="mt-1 text-xl font-semibold text-[#18371d]">{duplicate ? "Dupliquer l’annonce" : listing ? "Modifier l’annonce" : "Ajouter une annonce"}</h2></div><button type="button" onClick={onClose} aria-label="Fermer" className="rounded-lg p-2 text-[#617169] hover:bg-[#f1f5f0]"><X size={18}/></button></div>
       <p className="mt-4 text-xs font-semibold text-[#52655b]">Étape {step + 1} sur 3 · {["Informations du bien", "Description et position", "Photos et enregistrement"][step]}</p>
       {duplicate && <p className="mt-2 text-xs leading-5 text-[#52655b]">Nouvelle référence obligatoire. Les photos et documents ne sont pas copiés ; vérifiez les informations avant validation.</p>}
-      <form onSubmit={submit} noValidate className="mt-5 grid gap-3 sm:grid-cols-2">
+      <form onSubmit={submit} onKeyDown={(event) => {
+        if (event.key === "Enter" && !event.nativeEvent.isComposing && event.target instanceof HTMLInputElement && event.target.type !== "submit") {
+          event.preventDefault();
+        }
+      }} noValidate className="mt-5 grid gap-3 sm:grid-cols-2">
         <div data-form-step="0" className={step === 0 ? "grid gap-3 sm:col-span-2 sm:grid-cols-2" : "hidden"}>
-        <label className="text-xs font-semibold text-[#52655b]">Référence<input required maxLength={40} value={draft.ref} onChange={(event) => update("ref", event.target.value)} className="admin-field"/></label>
+        <label className="text-xs font-semibold text-[#52655b]">Référence<input required minLength={2} maxLength={40} pattern=".*\S.*" value={draft.ref} onChange={(event) => update("ref", event.target.value)} className="admin-field"/></label>
         <label className="text-xs font-semibold text-[#52655b]">Catégorie<select value={draft.category} onChange={(event) => update("category", event.target.value as ListingDraft["category"])} className="admin-field"><option value="immobilier">Immobilier</option><option value="terrain">Terrain</option></select></label>
-        <label className="text-xs font-semibold text-[#52655b] sm:col-span-2">Titre<input required minLength={5} maxLength={140} value={draft.title} onChange={(event) => update("title", event.target.value)} className="admin-field"/></label>
-        <label className="text-xs font-semibold text-[#52655b]">Région<input required maxLength={80} value={draft.region} onChange={(event) => update("region", event.target.value)} className="admin-field"/></label>
-        <label className="text-xs font-semibold text-[#52655b]">Localisation générale<input required maxLength={100} value={draft.location} onChange={(event) => update("location", event.target.value)} className="admin-field"/></label>
-        <label className="text-xs font-semibold text-[#52655b]">Prix (FCFA)<input required type="number" min="1" step="1" value={draft.price} onChange={(event) => update("price", Number(event.target.value))} className="admin-field"/></label>
+        <label className="text-xs font-semibold text-[#52655b] sm:col-span-2">Titre<input required minLength={5} maxLength={140} pattern=".*\S.*" value={draft.title} onChange={(event) => update("title", event.target.value)} className="admin-field"/></label>
+        <label className="text-xs font-semibold text-[#52655b]">Région<input required minLength={2} maxLength={80} pattern=".*\S.*" value={draft.region} onChange={(event) => update("region", event.target.value)} className="admin-field"/></label>
+        <label className="text-xs font-semibold text-[#52655b]">Localisation générale<input required minLength={2} maxLength={100} pattern=".*\S.*" value={draft.location} onChange={(event) => update("location", event.target.value)} className="admin-field"/></label>
+        <label className="text-xs font-semibold text-[#52655b]">Prix (FCFA)<input required type="number" min="1" max="9007199254740991" step="1" value={draft.price} onChange={(event) => update("price", Number(event.target.value))} className="admin-field"/></label>
         <label className="text-xs font-semibold text-[#52655b]">Période du prix<select value={draft.pricePeriod} onChange={(event) => update("pricePeriod", event.target.value as ListingDraft["pricePeriod"])} className="admin-field"><option value="total">Prix total</option><option value="monthly">Par mois</option></select></label>
-        <label className="text-xs font-semibold text-[#52655b]">Surface (m²)<input required type="number" min="0.01" step="0.01" value={draft.area} onChange={(event) => update("area", Number(event.target.value))} className="admin-field"/></label>
-        <label className="text-xs font-semibold text-[#52655b]">Type de bien<input required minLength={2} maxLength={80} value={draft.kind} onChange={(event) => update("kind", event.target.value)} className="admin-field"/></label>
+        <label className="text-xs font-semibold text-[#52655b]">Surface (m²)<input required type="number" min="0.01" max="99999999" step="0.01" value={draft.area} onChange={(event) => update("area", Number(event.target.value))} className="admin-field"/></label>
+        <label className="text-xs font-semibold text-[#52655b]">Type de bien<input required minLength={2} maxLength={80} pattern=".*\S.*" value={draft.kind} onChange={(event) => update("kind", event.target.value)} className="admin-field"/></label>
         <label className="text-xs font-semibold text-[#52655b]">Disponibilité<select value={draft.status} onChange={(event) => update("status", event.target.value)} className="admin-field"><option>Disponible</option><option>À louer</option><option>Réservé</option><option>Vendu</option></select></label>
         <label className="text-xs font-semibold text-[#52655b]">Publication<select value={draft.publicationStatus} onChange={(event) => update("publicationStatus", event.target.value)} className="admin-field"><option value="draft">Brouillon</option><option value="review">À vérifier</option><option value="archived">Archivé</option></select></label>
         </div>
@@ -266,9 +287,9 @@ function ListingForm({
           {(draft.photos.length > 0 || localPhotos.length > 0) && <div className="grid gap-3 sm:grid-cols-2">
             {draft.photos.map((photo, index) => <div key={`${photo.src}-${index}`} className="grid gap-2 rounded-lg border border-[#edf0ed] p-2">
               <Image src={photo.previewSrc ?? photo.src} alt={photo.alt} width={480} height={300} unoptimized className="h-36 w-full rounded-md bg-[#f4f3ec] object-cover"/>
-              <label className="text-[10px] font-semibold text-[#52655b]">Texte alternatif<input required minLength={10} maxLength={240} value={photo.alt} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} className="admin-field"/></label>
-              <label className="text-[10px] font-semibold text-[#52655b]">Crédit<input required minLength={2} maxLength={160} value={photo.credit} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} className="admin-field"/></label>
-              <label className="text-[10px] font-semibold text-[#52655b]">URL source HTTPS (facultative)<input type="url" value={photo.sourceUrl} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, sourceUrl: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-[10px] font-semibold text-[#52655b]">Texte alternatif<input required minLength={10} maxLength={240} pattern=".*\S.*" value={photo.alt} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-[10px] font-semibold text-[#52655b]">Crédit<input required minLength={2} maxLength={160} pattern=".*\S.*" value={photo.credit} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-[10px] font-semibold text-[#52655b]">URL source HTTPS (facultative)<input type="url" pattern="https://.+" title="Saisissez une URL commençant par https://." value={photo.sourceUrl} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, sourceUrl: event.target.value } : item))} className="admin-field"/></label>
               <div className="flex flex-wrap gap-3">
                 <button type="button" disabled={index === 0} onClick={() => { const photos = [...draft.photos]; [photos[index - 1], photos[index]] = [photos[index], photos[index - 1]]; update("photos", photos); }} aria-label={`Avancer la photo ${index + 1}`} className="text-[#32743d] disabled:opacity-40"><ArrowUp size={16}/></button>
                 <button type="button" disabled={index === draft.photos.length - 1} onClick={() => { const photos = [...draft.photos]; [photos[index + 1], photos[index]] = [photos[index], photos[index + 1]]; update("photos", photos); }} aria-label={`Reculer la photo ${index + 1}`} className="text-[#32743d] disabled:opacity-40"><ArrowDown size={16}/></button>
@@ -277,8 +298,8 @@ function ListingForm({
             </div>)}
             {localPhotos.map((photo, index) => <div key={photo.previewUrl} className="grid gap-2 rounded-lg border border-[#edf0ed] p-2">
               <Image src={photo.previewUrl} alt={photo.alt} width={480} height={300} unoptimized className="h-36 w-full rounded-md bg-[#f4f3ec] object-cover"/>
-              <label className="text-[10px] font-semibold text-[#52655b]">Texte alternatif<input required minLength={10} maxLength={240} value={photo.alt} onChange={(event) => setLocalPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} className="admin-field"/></label>
-              <label className="text-[10px] font-semibold text-[#52655b]">Crédit<input required minLength={2} maxLength={160} value={photo.credit} onChange={(event) => setLocalPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-[10px] font-semibold text-[#52655b]">Texte alternatif<input required minLength={10} maxLength={240} pattern=".*\S.*" value={photo.alt} onChange={(event) => setLocalPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-[10px] font-semibold text-[#52655b]">Crédit<input required minLength={2} maxLength={160} pattern=".*\S.*" value={photo.credit} onChange={(event) => setLocalPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} className="admin-field"/></label>
               <div className="flex flex-wrap gap-3">
                 <button type="button" disabled={index === 0} onClick={() => setLocalPhotos((current) => { const photos = [...current]; [photos[index - 1], photos[index]] = [photos[index], photos[index - 1]]; return photos; })} aria-label={`Avancer la nouvelle photo ${index + 1}`} className="text-[#32743d] disabled:opacity-40"><ArrowUp size={16}/></button>
                 <button type="button" disabled={index === localPhotos.length - 1} onClick={() => setLocalPhotos((current) => { const photos = [...current]; [photos[index + 1], photos[index]] = [photos[index], photos[index + 1]]; return photos; })} aria-label={`Reculer la nouvelle photo ${index + 1}`} className="text-[#32743d] disabled:opacity-40"><ArrowDown size={16}/></button>
@@ -290,7 +311,7 @@ function ListingForm({
         </div>
         <p className="sm:col-span-2 text-[10px] leading-4 text-[#849188]">Toute modification retire l’annonce publiée et nécessite une nouvelle validation par un responsable distinct. N’indiquez que des informations et visuels confirmés et autorisés ; la publication ne vaut pas vérification juridique ou foncière.</p>
         {error && <p role="alert" className="sm:col-span-2 rounded-lg bg-[#fbf0ee] p-3 text-xs text-[#8d3c32]">{error}</p>}
-        <div className="flex flex-wrap justify-end gap-2 sm:col-span-2"><button type="button" onClick={onClose} className="rounded-lg border border-[#e5eae5] px-4 py-2 text-xs font-semibold text-[#52655b]">Annuler</button>{step > 0 && <button type="button" onClick={() => setStep(step - 1)} className="rounded-lg border border-[#e5eae5] px-4 py-2 text-xs font-semibold text-[#52655b]">Précédent</button>}{step < 2 ? <button type="button" onClick={() => setStep(step + 1)} className="rounded-lg bg-[#32743d] px-4 py-2 text-xs font-bold text-white">Suivant</button> : <button disabled={busy} className="rounded-lg bg-[#32743d] px-4 py-2 text-xs font-bold text-white disabled:opacity-60">{busy ? "Enregistrement…" : listing && !duplicate ? "Enregistrer" : "Créer l’annonce"}</button>}</div>
+        <div className="flex flex-wrap justify-end gap-2 sm:col-span-2"><button type="button" onClick={onClose} className="rounded-lg border border-[#e5eae5] px-4 py-2 text-xs font-semibold text-[#52655b]">Annuler</button>{step > 0 && <button type="button" onClick={() => setStep(step - 1)} className="rounded-lg border border-[#e5eae5] px-4 py-2 text-xs font-semibold text-[#52655b]">Précédent</button>}{step < 2 ? <button type="button" onClick={() => setStep(step + 1)} className="rounded-lg bg-[#32743d] px-4 py-2 text-xs font-bold text-white">Suivant</button> : <button type="submit" disabled={busy} className="rounded-lg bg-[#32743d] px-4 py-2 text-xs font-bold text-white disabled:opacity-60">{busy ? "Enregistrement…" : listing && !duplicate ? "Enregistrer" : "Créer l’annonce"}</button>}</div>
       </form>
     </section>
   </div>;
@@ -452,7 +473,7 @@ export function AdminPropertiesTable({
       <section aria-labelledby="admin-map-title" className="min-w-0 rounded-2xl border border-[#e6ebe6] bg-white p-4 xl:sticky xl:top-24">
         <h2 id="admin-map-title" className="text-base font-semibold text-[#18371d]">Carte des annonces publiées</h2>
         <p className="mb-4 mt-1 text-xs leading-5 text-[#718078]">{markers.length} repère(s) approximatif(s) parmi les résultats. Les brouillons et annonces non publiées restent hors de la carte.</p>
-        <GoogleMapPanel markers={markers} focusId={focus.id} focusNonce={focus.nonce} heightClassName="h-[320px] xl:h-[520px]" note="Positions approximatives des annonces publiées uniquement ; aucun emplacement exact de parcelle n’est affiché."/>
+        <CesiumMapPanel markers={markers} focusId={focus.id} focusNonce={focus.nonce} heightClassName="h-[320px] xl:h-[520px]" note="Positions approximatives des annonces publiées uniquement ; aucun emplacement exact de parcelle n’est affiché."/>
       </section>
     </div>
     {(creating || editing) && <ListingForm key={editing?.id ?? "new"} listing={editing} onClose={() => { setCreating(false); setEditing(null); }} onSaved={refresh}/>}

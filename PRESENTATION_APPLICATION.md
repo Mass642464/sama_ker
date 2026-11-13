@@ -296,7 +296,7 @@ Connecter sources cartographiques autorisées, stockage privé, favoris, alertes
 | Portail public et direction visuelle | Maquette responsive navigable disponible ; voir le lancement local dans `README.md` |
 | Catalogues et filtres | Données fictives en local sans configuration ; lecture serveur des seules annonces publiées prévue via Supabase/RLS, sans projet distant configuré ni annonce réelle intégrée |
 | Fiches et galeries | Visuels en partie illustratifs ; ne documentent pas les biens réels |
-| Carte | Google Maps à la demande : repères et zones approximatives (≈ 1 km) pour les biens dont la position est validée, fond plan/satellite, « Ma position », tri par distance ; sans couche SIG cadastrale ; clé à configurer |
+| Carte | CesiumJS et tuiles 3D Google à la demande : repères et zones approximatives (≈ 1 km) pour les biens dont la position est validée, « Ma position », tri par distance ; sans couche SIG cadastrale ; clé Map Tiles et recette réelle nécessaires |
 | Formulaire | Appelle le backend autonome ; traitement désactivé par défaut, aucune demande n’est enregistrée sans configuration et recette Supabase |
 | Back-office | Connexion Supabase Auth et endpoints serveur protégés implémentés ; migration admin, variables d’environnement et recette réelle à faire |
 | Espace client | Première version codée (compte avec confirmation d’e-mail, suivi des demandes et rendez-vous) ; migration et recette sur Supabase de préproduction à faire ; sans notifications, récupération de mot de passe ni documents |

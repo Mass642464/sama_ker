@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+.cesium-attribution .cesium-widget-credits {
+  position: static;
+  color: #263238;
+  text-shadow: none;
+}
+
 :root {
   --background: #eae6dc;
   --foreground: #263238;

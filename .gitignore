@@ -22,6 +22,7 @@
 # production
 /build
 /backend/dist
+/public/cesium
 
 # misc
 .DS_Store
