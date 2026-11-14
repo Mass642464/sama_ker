@@ -100,7 +100,7 @@ export function PropertyMapExplorer({ properties, regions, query, isDemo, filter
     <aside className="min-w-0 rounded-2xl border border-[#e7e0d4] bg-white p-5 sm:p-7">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-[.15em] text-[#80622f]">Votre sélection</span>
+          <span className="text-xs font-bold uppercase tracking-[.15em] text-[#80622f]">Votre sélection</span>
           <h2 className="mt-2 text-xl font-semibold text-[#174c38]">Biens à découvrir</h2>
           <p className="mt-1 text-xs text-[#626d66]">
             {isDemo ? count(items.length, "annonce de démonstration", "annonces de démonstration") : count(items.length, "annonce publiée", "annonces publiées")}
@@ -113,9 +113,9 @@ export function PropertyMapExplorer({ properties, regions, query, isDemo, filter
       <form action="/carte" className="mt-4 flex gap-2">
         {Object.entries(filters).filter(([key, value]) => key !== "q" && key !== "page" && value).map(([key, value]) => <input key={key} type="hidden" name={key} value={value}/>)}
         <label className="flex h-11 min-w-0 flex-1 items-center gap-3 rounded-full border border-[#e7e0d4] bg-[#fbfcfa] px-4">
-          <Search size={15} className="shrink-0 text-[#737b75]"/>
+          <Search size={15} className="shrink-0 text-[#56605a]"/>
           <span className="sr-only">Rechercher par mots-clés ou phrase</span>
-          <input name="q" defaultValue={query} placeholder="Ville, type ou critères" className="min-w-0 flex-1 bg-transparent text-sm text-[#242a26] outline-none placeholder:text-[#959b96]"/>
+          <input name="q" defaultValue={query} placeholder="Ville, type ou critères" className="min-w-0 flex-1 bg-transparent text-sm text-[#242a26] outline-none placeholder:text-[#56605a]"/>
         </label>
         <button className="rounded-full bg-[#174c38] px-4 text-xs font-bold text-white">Filtrer</button>
       </form>
@@ -131,9 +131,9 @@ export function PropertyMapExplorer({ properties, regions, query, isDemo, filter
             {property.coordinates && <button type="button" onClick={() => setFocus((current) => ({ id: property.slug, nonce: current.nonce + 1 }))} aria-label={`Voir ${property.title} sur la carte`} className="mt-2 flex min-h-10 items-center gap-2 rounded-lg px-3 text-xs font-semibold text-[#174c38] hover:bg-[#f5f1e8]"><MapPin size={14}/> Voir sur la carte</button>}
           </div>;
         })}
-        {items.length === 0 && <p className="rounded-2xl bg-[#f1f2f0] p-4 text-xs leading-5 text-[#777e79]">Aucun bien ne correspond{query ? ` à « ${query} »` : ""}. Essayez une autre ville ou un autre quartier.</p>}
+        {items.length === 0 && <p className="rounded-2xl bg-[#f1f2f0] p-4 text-xs leading-5 text-[#56605a]">Aucun bien ne correspond{query ? ` à « ${query} »` : ""}. Essayez une autre ville ou un autre quartier.</p>}
       </div>
-      <p className="mt-4 rounded-xl bg-[#f1f2f0] p-3 text-[11px] leading-5 text-[#797f7a]">
+      <p className="mt-4 rounded-xl bg-[#f1f2f0] p-3 text-[11px] leading-5 text-[#56605a]">
         {isDemo ? "Les annonces, prix et localisations de cette liste sont fictifs et non vérifiés, et aucun n’est positionné." : "Les annonces sont publiées par l’équipe ; leurs informations sont à confirmer. Seuls les biens dont la zone a été validée sont repérés, sans coordonnée exacte ni donnée cadastrale."}
       </p>
     </aside>

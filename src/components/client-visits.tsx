@@ -63,12 +63,12 @@ export function ClientVisits() {
   }, [load]);
   return <section>
     <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-semibold text-[#18371d]">Mes visites</h2><button onClick={() => void load()} className="rounded-full border border-[#dfe6df] px-4 py-2 text-xs font-bold text-[#18371d]">Actualiser</button></div>
-    <p className="mt-2 text-xs text-[#718078]">Les demandes de changement doivent être validées par l’agence. Aucun e-mail automatique n’est envoyé.</p>
+    <p className="mt-2 text-xs text-[#56605a]">Les demandes de changement doivent être validées par l’agence. Aucun e-mail automatique n’est envoyé.</p>
     {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
     {notice && <p role="status" className="mt-3 text-sm text-[#32743d]">{notice}</p>}
-    {!visits && !error && <p className="mt-3 text-sm text-[#718078]">Chargement…</p>}
-    {visits?.length === 0 && <p className="mt-3 text-sm text-[#718078]">Aucune visite enregistrée.</p>}
+    {!visits && !error && <p className="mt-3 text-sm text-[#56605a]">Chargement…</p>}
+    {visits?.length === 0 && <p className="mt-3 text-sm text-[#56605a]">Aucune visite enregistrée.</p>}
     {visits && !error && !loading && <div className="mt-4 space-y-3">{visits.map((visit) => <VisitCard key={visit.id} visit={visit} onChange={async (message) => { setNotice(message); await load(); }}/>)}</div>}
-    <div className="mt-4 flex gap-2"><button disabled={offset === 0 || loading} onClick={() => setOffset((value) => value - 50)} className="rounded-lg border border-[#dfe6df] px-3 py-2 text-xs disabled:opacity-40">Précédent</button><span className="self-center text-xs text-[#718078]">Page {offset / 50 + 1}</span><button disabled={!hasMore || loading} onClick={() => setOffset((value) => value + 50)} className="rounded-lg border border-[#dfe6df] px-3 py-2 text-xs disabled:opacity-40">Suivant</button></div>
+    <div className="mt-4 flex gap-2"><button disabled={offset === 0 || loading} onClick={() => setOffset((value) => value - 50)} className="rounded-lg border border-[#dfe6df] px-3 py-2 text-xs disabled:opacity-40">Précédent</button><span className="self-center text-xs text-[#56605a]">Page {offset / 50 + 1}</span><button disabled={!hasMore || loading} onClick={() => setOffset((value) => value + 50)} className="rounded-lg border border-[#dfe6df] px-3 py-2 text-xs disabled:opacity-40">Suivant</button></div>
   </section>;
 }

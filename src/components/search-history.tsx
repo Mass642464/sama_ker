@@ -59,7 +59,7 @@ export function SearchHistory({ href, label }: { href: string; label: string }) 
       <div className="flex justify-between"><h3 className="font-semibold">{title}</h3><button type="button" onClick={() => write(key, [])} className="underline">Effacer</button></div>
       <ul className="mt-2 flex flex-wrap gap-2">{entries.map((entry) => <li key={entry.href} className="flex items-center rounded-full border border-[#dce5dc] bg-white">
         <Link href={entry.href} className="max-w-64 truncate px-3 py-2 font-semibold text-[#32743d]">{entry.label}</Link>
-        <button type="button" onClick={() => write(key, entries.filter((item) => item.href !== entry.href))} aria-label={`Supprimer ${entry.label}`} className="px-3 py-2 text-[#718078]">×</button>
+        <button type="button" onClick={() => write(key, entries.filter((item) => item.href !== entry.href))} aria-label={`Supprimer ${entry.label}`} className="px-3 py-2 text-[#56605a]">×</button>
       </li>)}</ul>
     </div>)}
   </section>;

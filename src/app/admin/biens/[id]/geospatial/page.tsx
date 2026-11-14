@@ -10,7 +10,7 @@ export default async function GeospatialPage({ params }: { params: Promise<{ id:
   return <div className="mx-auto max-w-4xl">
     <Link href="/admin/biens" className="inline-flex items-center gap-2 text-xs font-semibold text-[#65766d]"><ArrowLeft size={14}/> Retour aux biens</Link>
     <h1 className="mt-4 text-2xl font-semibold tracking-tight text-[#18371d]">Fiche géospatiale du terrain</h1>
-    <p className="mt-1 break-all font-mono text-[10px] text-[#a0a8a2]">{id}</p>
+    <p className="mt-1 break-all font-mono text-xs text-[#56605a]">{id}</p>
     <div className="mt-6"><GeospatialProfile listingId={id}/></div>
   </div>;
 }

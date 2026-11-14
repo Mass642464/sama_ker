@@ -115,6 +115,9 @@ test("the session reports the role and permissions resolved on the server", asyn
   assert.equal(commercial.canReview, false);
   const reviewer = await (await send(as("responsable"), "/api/admin/session")).json() as Record<string, unknown>;
   assert.equal(reviewer.canReview, true);
+  assert.equal((reviewer.permissions as string[]).includes("files:read"), false);
+  const direction = await (await send(as("direction"), "/api/admin/session")).json() as Record<string, unknown>;
+  assert.equal((direction.permissions as string[]).includes("files:read"), true);
   const bootstrap = await (await send(as("admin"), "/api/admin/session")).json() as Record<string, unknown>;
   assert.equal(bootstrap.role, "admin");
   assert.equal(bootstrap.canReview, false);
@@ -128,6 +131,7 @@ test("enforces the permission matrix per role", async () => {
   const cases: [string, string, string, number][] = [
     ["commercial", "/api/admin/leads", "GET", 200],
     ["commercial", "/api/admin/properties", "GET", 200],
+    ["commercial", `/api/admin/files?propertyId=${leadId}`, "GET", 403],
     ["commercial", property, "PATCH", 403],
     ["commercial", `/api/admin/geospatial-profile/${leadId}`, "PUT", 403],
     ["commercial", "/api/admin/staff", "GET", 403],
@@ -139,6 +143,9 @@ test("enforces the permission matrix per role", async () => {
     ["direction", `/api/admin/visits/${leadId}`, "POST", 403],
     ["technique", "/api/admin/properties", "GET", 200],
     ["direction", "/api/admin/leads", "GET", 200],
+    ["direction", `/api/admin/files?propertyId=${leadId}`, "GET", 200],
+    ["admin", `/api/admin/files?propertyId=${leadId}`, "GET", 200],
+    ["technique", `/api/admin/files?propertyId=${leadId}`, "GET", 403],
     ["direction", "/api/admin/leads/" + leadId, "PATCH", 403],
     ["direction", "/api/admin/appointments", "POST", 403],
     ["direction", "/api/admin/audit", "GET", 200],

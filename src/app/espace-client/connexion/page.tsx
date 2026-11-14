@@ -35,7 +35,7 @@ export default async function ClientLoginPage({ searchParams }: { searchParams: 
       {configured
         ? <AuthForms initialMode={params.mode === "inscription" ? "inscription" : params.mode === "oubli" ? "oubli" : "connexion"}/>
         : <p role="alert" className="rounded-xl bg-[#f8f2e8] p-4 text-xs leading-5 text-[#775d34]">L’espace client est désactivé : l’authentification et le service de demandes ne sont pas configurés.</p>}
-      <p className="mt-6 text-[11px] leading-5 text-[#89938d]">Le compte est facultatif : vous pouvez aussi écrire à l’équipe sans compte depuis la page Contact, mais la demande ne sera alors pas visible ici.</p>
+      <p className="mt-6 text-[11px] leading-5 text-[#56605a]">Le compte est facultatif : vous pouvez aussi écrire à l’équipe sans compte depuis la page Contact, mais la demande ne sera alors pas visible ici.</p>
     </div></section>
   </PageShell>;
 }

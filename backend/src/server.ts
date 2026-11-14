@@ -15,6 +15,13 @@ function send(response: ServerResponse, result: Response, origin: string | null,
   response.statusCode = result.status;
   result.headers.forEach((value, name) => response.setHeader(name, value));
   response.setHeader("Cache-Control", "no-store");
+  response.setHeader("X-Content-Type-Options", "nosniff");
+  response.setHeader("X-Frame-Options", "DENY");
+  response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+  if (process.env.NODE_ENV === "production") {
+    response.setHeader("Strict-Transport-Security", "max-age=31536000");
+  }
 
   if (origin && allowedOrigins.has(origin)) {
     response.setHeader("Access-Control-Allow-Origin", origin);

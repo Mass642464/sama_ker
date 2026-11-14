@@ -216,7 +216,7 @@ test("redirects to a short-lived URL only for a published image", async () => {
   );
   assert.equal(response.status, 302);
   assert.match(response.headers.get("location") ?? "", /object\/sign\/listing-images/);
-  assert.equal(response.headers.get("cache-control"), "private, max-age=30");
+  assert.equal(response.headers.get("cache-control"), "public, max-age=30, s-maxage=30");
 });
 
 test("deletes only an unreferenced private image", async () => {

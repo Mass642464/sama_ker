@@ -30,7 +30,7 @@ export function PropertyGallery({ photos = [], isDemo, art }: { photos?: Propert
     </figure>
     {photos.length > 1 && <div role="group" aria-label="Choisir une photo" className="mt-4 flex gap-2 overflow-x-auto pb-2">
       {photos.map((item, index) => <button key={`${item.src}-${index}`} type="button" aria-label={`Afficher la photo ${index + 1} sur ${photos.length} : ${item.alt}`} aria-pressed={selected === index} onClick={() => setSelected(index)} className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 ${selected === index ? "border-[#174c38]" : "border-transparent"}`}>
-        {failed.includes(item.src) ? <span className="grid h-full place-items-center bg-[#f5f1e8] text-[10px] text-[#263238]">Indisponible</span> : dataSaver ? <span className="grid h-full place-items-center bg-[#f5f1e8] text-sm font-semibold text-[#174c38]">{index + 1}</span> : <Image src={item.src} alt="" fill unoptimized={!isDemo} sizes="96px" onError={() => recordFailure(item.src)} className="object-cover"/>}
+        {failed.includes(item.src) ? <span className="grid h-full place-items-center bg-[#f5f1e8] text-xs text-[#263238]">Indisponible</span> : dataSaver ? <span className="grid h-full place-items-center bg-[#f5f1e8] text-sm font-semibold text-[#174c38]">{index + 1}</span> : <Image src={item.src} alt="" fill unoptimized={!isDemo} sizes="96px" onError={() => recordFailure(item.src)} className="object-cover"/>}
       </button>)}
     </div>}
   </section>;

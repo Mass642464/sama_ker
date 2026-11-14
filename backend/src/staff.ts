@@ -13,6 +13,7 @@ export type Permission =
   | "appointments:write"
   | "staff:manage"
   | "audit:read"
+  | "files:read"
   | "work:read"
   | "work:write"
   | "work:assign";
@@ -29,11 +30,11 @@ export const roleLabels: Record<Role, string> = {
 // Le droit de valider une annonce (properties:review) n'est volontairement attribué qu'au rôle « responsable »
 // ou aux adresses de LISTING_REVIEWER_EMAILS : un administrateur ne valide pas ses propres modifications.
 export const rolePermissions: Record<Role, Permission[]> = {
-  admin: ["dashboard:read", "properties:read", "properties:write", "leads:read", "leads:write", "appointments:read", "appointments:write", "staff:manage", "audit:read", "work:read", "work:write", "work:assign"],
+  admin: ["dashboard:read", "properties:read", "properties:write", "files:read", "leads:read", "leads:write", "appointments:read", "appointments:write", "staff:manage", "audit:read", "work:read", "work:write", "work:assign"],
   responsable: ["dashboard:read", "properties:read", "properties:review", "leads:read", "appointments:read"],
   commercial: ["dashboard:read", "properties:read", "leads:read", "leads:write", "appointments:read", "appointments:write"],
   technique: ["dashboard:read", "properties:read", "properties:write"],
-  direction: ["dashboard:read", "properties:read", "leads:read", "appointments:read", "audit:read"],
+  direction: ["dashboard:read", "properties:read", "files:read", "leads:read", "appointments:read", "audit:read"],
   responsable_travaux: ["work:read", "work:write"],
 };
 

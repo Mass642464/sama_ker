@@ -257,15 +257,15 @@ export function CesiumMapPanel({
       {(status === "idle" || status === "error") && <div className="grid h-full place-items-center p-6 text-center"><div className="max-w-sm">
         <span className="mx-auto grid size-11 place-items-center rounded-full bg-[#edf4ee] text-[#3d7759]"><MapPinned size={20}/></span>
         <p className="mt-4 text-sm font-semibold text-[#174c38]">Carte immersive 3D</p>
-        <p className="mt-2 flex items-start gap-2 text-left text-[11px] leading-5 text-[#6f7c74]"><ShieldCheck size={14} className="mt-0.5 shrink-0 text-[#548365]"/>En affichant la carte, votre navigateur se connecte à Google et aux services de Cesium ; ces services peuvent recevoir votre adresse IP et les zones affichées.</p>
+        <p className="mt-2 flex items-start gap-2 text-left text-[11px] leading-5 text-[#56605a]"><ShieldCheck size={14} className="mt-0.5 shrink-0 text-[#548365]"/>En affichant la carte, votre navigateur se connecte à Google et aux services de Cesium ; ces services peuvent recevoir votre adresse IP et les zones affichées.</p>
         {error && <p role="alert" className="mt-3 rounded-lg bg-[#fbf0ee] px-3 py-2 text-xs text-[#8d3c32]">{error}</p>}
         <button type="button" onClick={() => void start()} className="mt-4 min-h-11 rounded-full bg-[#174c38] px-6 text-xs font-bold text-white">{status === "error" ? "Réessayer" : "Afficher la carte 3D"}</button>
       </div></div>}
-      {status === "loading" && <div role="status" className="absolute inset-0 z-10 grid place-items-center bg-[#f0f3ec] text-xs text-[#6f7c74]"><span className="flex items-center gap-2"><LoaderCircle size={16} className="animate-spin"/>Chargement de la carte 3D…</span></div>}
-      <div ref={container} className={`absolute inset-0 ${status === "ready" ? "" : "invisible"}`} role="application" aria-label="Carte 3D du Sénégal"/>
+      {status === "loading" && <div role="status" className="absolute inset-0 z-10 grid place-items-center bg-[#f0f3ec] text-xs text-[#56605a]"><span className="flex items-center gap-2"><LoaderCircle size={16} className="animate-spin"/>Chargement de la carte 3D…</span></div>}
+      <div ref={container} className={`absolute inset-0 ${status === "ready" ? "" : "invisible"}`} role="region" aria-label="Carte 3D du Sénégal"/>
       <div className={`cesium-attribution absolute inset-x-0 bottom-0 z-10 flex items-center bg-white text-[#263238] ${status === "ready" ? "" : "invisible"}`}>
         <Image src="/images/google-maps-attribution.png" alt="Google Maps" width={98} height={18} unoptimized className="mx-[10px] mb-[5px] mt-[10px] h-[18px] w-auto shrink-0"/>
-        <div ref={credits} className="min-w-0 flex-1 text-[10px] leading-4"/>
+        <div ref={credits} className="min-w-0 flex-1 text-xs leading-4"/>
       </div>
       {status === "ready" && locate && <button type="button" onClick={locateUser} disabled={locating} className="absolute right-3 top-3 z-10 inline-flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-xs font-bold text-[#174c38] shadow-lg disabled:opacity-60">{locating ? <LoaderCircle size={14} className="animate-spin"/> : <LocateFixed size={14}/>}Ma position</button>}
       {status === "ready" && selected && <div className="absolute left-3 top-3 z-10 max-w-56 rounded-xl bg-white p-3 text-xs text-[#174c38] shadow-lg"><button type="button" onClick={() => setSelected(null)} className="float-right ml-2 font-bold" aria-label="Fermer">×</button><strong>{selected.title}</strong><p className="mt-1">{selected.detail}</p><a href={selected.href} className="mt-2 inline-block font-bold underline">Voir la fiche</a></div>}
@@ -273,6 +273,6 @@ export function CesiumMapPanel({
     {status === "ready" && error && <p role="alert" className="text-xs text-[#8d3c32]">{error}</p>}
     <p aria-live="polite" className="min-h-4 text-[11px] leading-5 text-[#60806a]">{locationMessage}</p>
     {importError?.geometry === importedGeometry && <p role="alert" className="text-xs text-red-700">{importError.message}</p>}
-    <p className="text-[11px] leading-5 text-[#89938d]">{note ?? (markers.length ? "Chaque repère indique une zone d’environ 1 km, pas l’emplacement exact du bien." : "Vue générale : aucun bien n’est positionné tant qu’une position n’a pas été validée par l’équipe.")}</p>
+    <p className="text-[11px] leading-5 text-[#56605a]">{note ?? (markers.length ? "Chaque repère indique une zone d’environ 1 km, pas l’emplacement exact du bien." : "Vue générale : aucun bien n’est positionné tant qu’une position n’a pas été validée par l’équipe.")}</p>
   </div>;
 }

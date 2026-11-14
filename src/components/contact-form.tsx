@@ -147,7 +147,7 @@ export function ContactForm({ propertyReference = "", initialSubject = "property
         <label className="text-xs font-semibold text-[#43584e]">
           Adresse e-mail
           <input required key={accountEmail} name="email" type="email" autoComplete="email" maxLength={254} defaultValue={accountEmail} readOnly={Boolean(accountEmail)} aria-describedby={accountEmail ? "contact-account-note" : undefined} className="mt-2 block h-12 w-full rounded-xl border border-[#e7e0d4] bg-[#fbfcfa] px-4 text-sm font-normal outline-none read-only:bg-[#f0f3ec] focus:border-[#78a989]" placeholder="vous@exemple.com"/>
-          {accountEmail && <span id="contact-account-note" className="mt-1.5 block text-[11px] font-normal text-[#718078]">Adresse de votre compte : la demande apparaîtra dans « Mon espace ».</span>}
+          {accountEmail && <span id="contact-account-note" className="mt-1.5 block text-[11px] font-normal text-[#56605a]">Adresse de votre compte : la demande apparaîtra dans « Mon espace ».</span>}
         </label>
       </div>
       <label className="block text-xs font-semibold text-[#43584e]">
@@ -181,7 +181,7 @@ export function ContactForm({ propertyReference = "", initialSubject = "property
         {sent && <><CheckCircle2 size={15}/>{accountEmail ? "Votre demande a bien été enregistrée : retrouvez son suivi dans « Mon espace ». Aucun message de suivi automatique n’est envoyé pour le moment." : "Votre demande a bien été enregistrée. Aucun message de suivi automatique n’est envoyé pour le moment."}</>}
       </p>
       {error && <p role="alert" className="text-xs leading-5 text-red-700">{error}</p>}
-      <p className="text-[11px] leading-5 text-[#89938d]">La politique de confidentialité et les durées de conservation doivent être validées avant tout lancement public.</p>
+      <p className="text-[11px] leading-5 text-[#56605a]">La politique de confidentialité et les durées de conservation doivent être validées avant tout lancement public.</p>
     </form>
   );
 }

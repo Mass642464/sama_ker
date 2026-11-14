@@ -13,8 +13,8 @@ export function PropertyCard({ property }: { property: Property }) {
   return <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[#e7e0d4] bg-white shadow-[0_5px_20px_rgba(27,38,30,.035)] transition duration-300 hover:border-[#c59b52]">
     <div className={`property-art property-art--${property.art} relative h-[220px] sm:h-[240px]`}>
       <PropertyCardImage key={property.photos?.[0]?.src ?? "empty"} photo={property.photos?.[0]} isDemo={property.isDemo}/>
-      <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1.5 text-[10px] font-bold text-[#174c38]">{property.kind}</span>
-      {property.isDemo && <span className="absolute right-3 top-3 rounded-full bg-[#fff9eb] px-3 py-1.5 text-[10px] font-bold text-[#604c27]">Exemple fictif</span>}
+      <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#174c38]">{property.kind}</span>
+      {property.isDemo && <span className="absolute right-3 top-3 rounded-full bg-[#fff9eb] px-3 py-1.5 text-xs font-bold text-[#604c27]">Exemple fictif</span>}
     </div>
     <div className="flex flex-1 flex-col p-5">
       <p className="text-lg font-bold text-[#174c38]">{property.priceLabel}</p>

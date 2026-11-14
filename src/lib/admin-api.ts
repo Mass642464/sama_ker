@@ -29,7 +29,7 @@ export type AdminLead = {
 
 export type AdminPermission =
   | "dashboard:read" | "properties:read" | "properties:write" | "properties:review"
-  | "leads:read" | "leads:write" | "appointments:read" | "appointments:write" | "staff:manage" | "audit:read"
+  | "leads:read" | "leads:write" | "appointments:read" | "appointments:write" | "staff:manage" | "audit:read" | "files:read"
   | "work:read" | "work:write" | "work:assign";
 
 export type AdminSession = {

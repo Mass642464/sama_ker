@@ -178,21 +178,22 @@ test("applies the file permissions per role", async () => {
   assert.equal((await upload(commercial, pdf)).status, 403);
   assert.equal((await upload(direction, pdf)).status, 403);
   assert.equal((await upload(reviewer, pdf)).status, 403);
-  assert.equal((await send(commercial, `/api/admin/files?propertyId=${listingId}`)).status, 200);
+  assert.equal((await send(commercial, `/api/admin/files?propertyId=${listingId}`)).status, 403);
   assert.equal((await send(direction, `/api/admin/files?propertyId=${listingId}`)).status, 200);
-  assert.equal((await send(reviewer, `/api/admin/files?propertyId=${listingId}`)).status, 200);
+  assert.equal((await send(reviewer, `/api/admin/files?propertyId=${listingId}`)).status, 403);
+  assert.equal((await send(technique, `/api/admin/files?propertyId=${listingId}`)).status, 403);
   assert.equal((await upload(admin, pdf)).status, 201);
 });
 
 test("lists files without exposing storage paths", async () => {
-  const body = await (await send(technique, `/api/admin/files?propertyId=${listingId}`)).json() as Array<Record<string, unknown>>;
+  const body = await (await send(direction, `/api/admin/files?propertyId=${listingId}`)).json() as Array<Record<string, unknown>>;
   assert.deepEqual(body[0], { id: fileId, name: "bilan.pdf", type: "application/pdf", sizeBytes: 12, createdAt: "2026-11-09T09:00:00Z" });
   assert.equal(JSON.stringify(body).includes("listing/"), false);
-  assert.equal((await send(technique, "/api/admin/files?propertyId=pas-un-id")).status, 400);
+  assert.equal((await send(direction, "/api/admin/files?propertyId=pas-un-id")).status, 400);
 });
 
 test("issues a short-lived download link on the storage service only", async () => {
-  const response = await send(reviewer, `/api/admin/files/${fileId}/url`);
+  const response = await send(direction, `/api/admin/files/${fileId}/url`);
   assert.equal(response.status, 200);
   const body = await response.json() as { url: string; expiresInSeconds: number };
   assert.equal(body.expiresInSeconds, 60);
@@ -202,9 +203,11 @@ test("issues a short-lived download link on the storage service only", async () 
   assert.deepEqual(signRequest?.body, { expiresIn: 60 });
 });
 
-test("any role that can read listings may request a download link; unknown files are refused", async () => {
-  assert.equal((await send(commercial, `/api/admin/files/${fileId}/url`)).status, 200);
-  assert.equal((await send(technique, "/api/admin/files/pas-un-id/url")).status, 404);
+test("only administrators and direction may download private files", async () => {
+  assert.equal((await send(admin, `/api/admin/files/${fileId}/url`)).status, 200);
+  assert.equal((await send(commercial, `/api/admin/files/${fileId}/url`)).status, 403);
+  assert.equal((await send(reviewer, `/api/admin/files/${fileId}/url`)).status, 403);
+  assert.equal((await send(technique, "/api/admin/files/pas-un-id/url")).status, 403);
 });
 
 test("deletes the object before its metadata and keeps the record when storage fails", async () => {

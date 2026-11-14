@@ -208,9 +208,12 @@ export async function getPropertyCatalog(): Promise<{ properties: Property[]; is
 
   let response: Response;
   try {
-    response = await fetch(url, {
+    const requestOptions: RequestInit & { next: { revalidate: number; tags: string[] } } = {
       headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
-      cache: "no-store",
+      next: { revalidate: 60, tags: ["public-property-catalog"] },
+    };
+    response = await fetch(url, {
+      ...requestOptions,
     });
   } catch (error) {
     throw new Error("Could not connect to Supabase to load published listings.", { cause: error });

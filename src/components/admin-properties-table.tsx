@@ -245,7 +245,7 @@ function ListingForm({
 
   return <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[#17251bcc] p-4" role="presentation">
     <section role="dialog" aria-modal="true" aria-labelledby="listing-form-title" className="my-auto max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 shadow-xl sm:p-7">
-      <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#60856c]">Catalogue</p><h2 id="listing-form-title" className="mt-1 text-xl font-semibold text-[#18371d]">{duplicate ? "Dupliquer l’annonce" : listing ? "Modifier l’annonce" : "Ajouter une annonce"}</h2></div><button type="button" onClick={onClose} aria-label="Fermer" className="rounded-lg p-2 text-[#617169] hover:bg-[#f1f5f0]"><X size={18}/></button></div>
+      <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-[#3d7759]">Catalogue</p><h2 id="listing-form-title" className="mt-1 text-xl font-semibold text-[#18371d]">{duplicate ? "Dupliquer l’annonce" : listing ? "Modifier l’annonce" : "Ajouter une annonce"}</h2></div><button type="button" onClick={onClose} aria-label="Fermer" className="rounded-lg p-2 text-[#617169] hover:bg-[#f1f5f0]"><X size={18}/></button></div>
       <p className="mt-4 text-xs font-semibold text-[#52655b]">Étape {step + 1} sur 3 · {["Informations du bien", "Description et position", "Photos et enregistrement"][step]}</p>
       {duplicate && <p className="mt-2 text-xs leading-5 text-[#52655b]">Nouvelle référence obligatoire. Les photos et documents ne sont pas copiés ; vérifiez les informations avant validation.</p>}
       <form onSubmit={submit} onKeyDown={(event) => {
@@ -273,13 +273,13 @@ function ListingForm({
           <legend className="px-1 text-xs font-semibold text-[#52655b]">Position approximative sur la carte (facultative)</legend>
           <label className="text-xs font-semibold text-[#52655b]">Latitude<input type="number" inputMode="decimal" min="12" max="16.8" step="0.01" value={draft.latitude ?? ""} onChange={(event) => update("latitude", event.target.value === "" ? null : Number(event.target.value))} className="admin-field" placeholder="14.79"/></label>
           <label className="text-xs font-semibold text-[#52655b]">Longitude<input type="number" inputMode="decimal" min="-17.8" max="-11.3" step="0.01" value={draft.longitude ?? ""} onChange={(event) => update("longitude", event.target.value === "" ? null : Number(event.target.value))} className="admin-field" placeholder="-16.93"/></label>
-          <p className="sm:col-span-2 text-[10px] leading-4 text-[#849188]">Indiquez le centre d’une zone d’environ 1 km, pas l’emplacement exact : les valeurs sont arrondies à 0,01° (≈ 1 km) et publiées après validation. Renseignez les deux champs ou aucun. Ne saisissez jamais les coordonnées précises d’une parcelle.</p>
+          <p className="sm:col-span-2 text-xs leading-4 text-[#56605a]">Indiquez le centre d’une zone d’environ 1 km, pas l’emplacement exact : les valeurs sont arrondies à 0,01° (≈ 1 km) et publiées après validation. Renseignez les deux champs ou aucun. Ne saisissez jamais les coordonnées précises d’une parcelle.</p>
         </fieldset>
         </div>
         <div data-form-step="2" className={step === 2 ? "sm:col-span-2" : "hidden"}>
         <fieldset className="sm:col-span-2 grid gap-3 rounded-xl border border-[#e5eae5] p-3">
           <legend className="px-1 text-xs font-semibold text-[#52655b]">Photos du bien ({draft.photos.length + localPhotos.length}/12)</legend>
-          <p className="text-[10px] leading-4 text-[#849188]">Importez des photos depuis votre appareil, sous différents angles. Elles restent privées jusqu’à l’approbation de l’annonce. JPG, PNG ou WebP, moins de 10 Mo par photo.</p>
+          <p className="text-xs leading-4 text-[#56605a]">Importez des photos depuis votre appareil, sous différents angles. Elles restent privées jusqu’à l’approbation de l’annonce. JPG, PNG ou WebP, moins de 10 Mo par photo.</p>
           <label htmlFor="listing-local-photos" className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-[#dce6dc] px-3 py-2 text-xs font-semibold text-[#32743d] hover:bg-[#f5f8f3]">
             <Upload size={14}/> Choisir des photos
           </label>
@@ -287,29 +287,29 @@ function ListingForm({
           {(draft.photos.length > 0 || localPhotos.length > 0) && <div className="grid gap-3 sm:grid-cols-2">
             {draft.photos.map((photo, index) => <div key={`${photo.src}-${index}`} className="grid gap-2 rounded-lg border border-[#edf0ed] p-2">
               <Image src={photo.previewSrc ?? photo.src} alt={photo.alt} width={480} height={300} unoptimized className="h-36 w-full rounded-md bg-[#f4f3ec] object-cover"/>
-              <label className="text-[10px] font-semibold text-[#52655b]">Texte alternatif<input required minLength={10} maxLength={240} pattern=".*\S.*" value={photo.alt} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} className="admin-field"/></label>
-              <label className="text-[10px] font-semibold text-[#52655b]">Crédit<input required minLength={2} maxLength={160} pattern=".*\S.*" value={photo.credit} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} className="admin-field"/></label>
-              <label className="text-[10px] font-semibold text-[#52655b]">URL source HTTPS (facultative)<input type="url" pattern="https://.+" title="Saisissez une URL commençant par https://." value={photo.sourceUrl} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, sourceUrl: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-xs font-semibold text-[#52655b]">Texte alternatif<input required minLength={10} maxLength={240} pattern=".*\S.*" value={photo.alt} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-xs font-semibold text-[#52655b]">Crédit<input required minLength={2} maxLength={160} pattern=".*\S.*" value={photo.credit} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-xs font-semibold text-[#52655b]">URL source HTTPS (facultative)<input type="url" pattern="https://.+" title="Saisissez une URL commençant par https://." value={photo.sourceUrl} onChange={(event) => update("photos", draft.photos.map((item, itemIndex) => itemIndex === index ? { ...item, sourceUrl: event.target.value } : item))} className="admin-field"/></label>
               <div className="flex flex-wrap gap-3">
                 <button type="button" disabled={index === 0} onClick={() => { const photos = [...draft.photos]; [photos[index - 1], photos[index]] = [photos[index], photos[index - 1]]; update("photos", photos); }} aria-label={`Avancer la photo ${index + 1}`} className="text-[#32743d] disabled:opacity-40"><ArrowUp size={16}/></button>
                 <button type="button" disabled={index === draft.photos.length - 1} onClick={() => { const photos = [...draft.photos]; [photos[index + 1], photos[index]] = [photos[index], photos[index + 1]]; update("photos", photos); }} aria-label={`Reculer la photo ${index + 1}`} className="text-[#32743d] disabled:opacity-40"><ArrowDown size={16}/></button>
-                <button type="button" onClick={() => { removePreview(photo.previewSrc); update("photos", draft.photos.filter((_, itemIndex) => itemIndex !== index)); }} className="inline-flex w-fit items-center gap-1 text-[10px] font-semibold text-[#8d3c32]"><Trash2 size={12}/> Retirer la photo</button>
+                <button type="button" onClick={() => { removePreview(photo.previewSrc); update("photos", draft.photos.filter((_, itemIndex) => itemIndex !== index)); }} className="inline-flex w-fit items-center gap-1 text-xs font-semibold text-[#8d3c32]"><Trash2 size={12}/> Retirer la photo</button>
               </div>
             </div>)}
             {localPhotos.map((photo, index) => <div key={photo.previewUrl} className="grid gap-2 rounded-lg border border-[#edf0ed] p-2">
               <Image src={photo.previewUrl} alt={photo.alt} width={480} height={300} unoptimized className="h-36 w-full rounded-md bg-[#f4f3ec] object-cover"/>
-              <label className="text-[10px] font-semibold text-[#52655b]">Texte alternatif<input required minLength={10} maxLength={240} pattern=".*\S.*" value={photo.alt} onChange={(event) => setLocalPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} className="admin-field"/></label>
-              <label className="text-[10px] font-semibold text-[#52655b]">Crédit<input required minLength={2} maxLength={160} pattern=".*\S.*" value={photo.credit} onChange={(event) => setLocalPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-xs font-semibold text-[#52655b]">Texte alternatif<input required minLength={10} maxLength={240} pattern=".*\S.*" value={photo.alt} onChange={(event) => setLocalPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} className="admin-field"/></label>
+              <label className="text-xs font-semibold text-[#52655b]">Crédit<input required minLength={2} maxLength={160} pattern=".*\S.*" value={photo.credit} onChange={(event) => setLocalPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, credit: event.target.value } : item))} className="admin-field"/></label>
               <div className="flex flex-wrap gap-3">
                 <button type="button" disabled={index === 0} onClick={() => setLocalPhotos((current) => { const photos = [...current]; [photos[index - 1], photos[index]] = [photos[index], photos[index - 1]]; return photos; })} aria-label={`Avancer la nouvelle photo ${index + 1}`} className="text-[#32743d] disabled:opacity-40"><ArrowUp size={16}/></button>
                 <button type="button" disabled={index === localPhotos.length - 1} onClick={() => setLocalPhotos((current) => { const photos = [...current]; [photos[index + 1], photos[index]] = [photos[index], photos[index + 1]]; return photos; })} aria-label={`Reculer la nouvelle photo ${index + 1}`} className="text-[#32743d] disabled:opacity-40"><ArrowDown size={16}/></button>
-                <button type="button" onClick={() => { removePreview(photo.previewUrl); setLocalPhotos((current) => current.filter((_, itemIndex) => itemIndex !== index)); }} className="inline-flex w-fit items-center gap-1 text-[10px] font-semibold text-[#8d3c32]"><Trash2 size={12}/> Retirer la photo</button>
+                <button type="button" onClick={() => { removePreview(photo.previewUrl); setLocalPhotos((current) => current.filter((_, itemIndex) => itemIndex !== index)); }} className="inline-flex w-fit items-center gap-1 text-xs font-semibold text-[#8d3c32]"><Trash2 size={12}/> Retirer la photo</button>
               </div>
             </div>)}
           </div>}
         </fieldset>
         </div>
-        <p className="sm:col-span-2 text-[10px] leading-4 text-[#849188]">Toute modification retire l’annonce publiée et nécessite une nouvelle validation par un responsable distinct. N’indiquez que des informations et visuels confirmés et autorisés ; la publication ne vaut pas vérification juridique ou foncière.</p>
+        <p className="sm:col-span-2 text-xs leading-4 text-[#56605a]">Toute modification retire l’annonce publiée et nécessite une nouvelle validation par un responsable distinct. N’indiquez que des informations et visuels confirmés et autorisés ; la publication ne vaut pas vérification juridique ou foncière.</p>
         {error && <p role="alert" className="sm:col-span-2 rounded-lg bg-[#fbf0ee] p-3 text-xs text-[#8d3c32]">{error}</p>}
         <div className="flex flex-wrap justify-end gap-2 sm:col-span-2"><button type="button" onClick={onClose} className="rounded-lg border border-[#e5eae5] px-4 py-2 text-xs font-semibold text-[#52655b]">Annuler</button>{step > 0 && <button type="button" onClick={() => setStep(step - 1)} className="rounded-lg border border-[#e5eae5] px-4 py-2 text-xs font-semibold text-[#52655b]">Précédent</button>}{step < 2 ? <button type="button" onClick={() => setStep(step + 1)} className="rounded-lg bg-[#32743d] px-4 py-2 text-xs font-bold text-white">Suivant</button> : <button type="submit" disabled={busy} className="rounded-lg bg-[#32743d] px-4 py-2 text-xs font-bold text-white disabled:opacity-60">{busy ? "Enregistrement…" : listing && !duplicate ? "Enregistrer" : "Créer l’annonce"}</button>}</div>
       </form>
@@ -355,7 +355,7 @@ function ReviewForm({ listing, onClose, onSaved }: { listing: AdminListing; onCl
         <div><dt className="font-bold">Disponibilité</dt><dd>{listing.status}</dd></div>
         <div className="sm:col-span-2"><dt className="font-bold">Description</dt><dd className="whitespace-pre-wrap">{listing.description}</dd></div>
         <div className="sm:col-span-2"><dt className="font-bold">Caractéristiques</dt><dd>{listing.features.join(" · ") || "Aucune"}</dd></div>
-        <div className="sm:col-span-2"><dt className="font-bold">Médias à vérifier</dt><dd>{listing.photos?.length ? <div className="grid gap-3 sm:grid-cols-2">{listing.photos.map((photo) => <a key={photo.src} href={photo.previewSrc ?? photo.src} target="_blank" rel="noopener noreferrer" className="grid gap-2 rounded-lg border border-[#e5eae5] p-2"><Image src={photo.previewSrc ?? photo.src} alt={photo.alt} width={480} height={300} unoptimized className="h-36 w-full rounded-md bg-[#f4f3ec] object-cover"/><span className="text-[10px]">{photo.alt} · Crédit : {photo.credit}</span></a>)}</div> : "Aucune photo : validation impossible."}</dd></div>
+        <div className="sm:col-span-2"><dt className="font-bold">Médias à vérifier</dt><dd>{listing.photos?.length ? <div className="grid gap-3 sm:grid-cols-2">{listing.photos.map((photo) => <a key={photo.src} href={photo.previewSrc ?? photo.src} target="_blank" rel="noopener noreferrer" className="grid gap-2 rounded-lg border border-[#e5eae5] p-2"><Image src={photo.previewSrc ?? photo.src} alt={photo.alt} width={480} height={300} unoptimized className="h-36 w-full rounded-md bg-[#f4f3ec] object-cover"/><span className="text-xs">{photo.alt} · Crédit : {photo.credit}</span></a>)}</div> : "Aucune photo : validation impossible."}</dd></div>
       </dl>
       <form onSubmit={approve} className="mt-4 grid gap-3 text-xs text-[#344b3f]">
         <label className="flex gap-2"><input type="checkbox" required checked={fieldsConfirmed} onChange={(event) => setFieldsConfirmed(event.target.checked)}/>Les informations et leur actualité ont été contrôlées auprès de sources autorisées.</label>
@@ -391,6 +391,7 @@ export function AdminPropertiesTable({
   const { can } = useAdminSession();
   const canWrite = can("properties:write");
   const canReview = can("properties:review");
+  const canReadFiles = can("files:read");
 
   async function refresh() {
     const result = await adminApi<AdminListing[]>("/api/admin/properties");
@@ -430,19 +431,19 @@ export function AdminPropertiesTable({
 
   return <>
     <div className="flex flex-wrap gap-3 rounded-2xl border border-[#e6ebe6] bg-white p-4">
-      <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-lg bg-[#f6f8f5] px-3 sm:min-w-48"><Search size={14} className="shrink-0 text-[#849188]"/><span className="sr-only">Rechercher une annonce</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher un bien, une référence…" className="w-full bg-transparent text-xs outline-none placeholder:text-[#849188]"/></label>
+      <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-lg bg-[#f6f8f5] px-3 sm:min-w-48"><Search size={14} className="shrink-0 text-[#56605a]"/><span className="sr-only">Rechercher une annonce</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher un bien, une référence…" className="w-full bg-transparent text-xs outline-none placeholder:text-[#56605a]"/></label>
       <div className="flex flex-wrap gap-2">
         <label className="flex h-10 items-center rounded-lg border border-[#e5eae5] px-3 text-xs text-[#52655b]"><select aria-label="Filtrer par catégorie" value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} className="bg-transparent font-semibold outline-none"><option>Toutes les catégories</option><option value="terrain">Terrains</option><option value="immobilier">Immobilier</option></select></label>
-        <label className="flex h-10 items-center gap-2 rounded-lg border border-[#e5eae5] px-3 text-[10px] text-[#67776f]"><SlidersHorizontal size={13}/><select aria-label="Filtrer par disponibilité" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="bg-transparent font-semibold outline-none"><option>Tous les statuts</option><option>Disponible</option><option>À louer</option><option>Réservé</option><option>Vendu</option></select></label>
-        <label className="flex h-10 items-center gap-2 rounded-lg border border-[#e5eae5] px-3 text-[10px] text-[#67776f]"><select aria-label="Filtrer par publication" value={publicationFilter} onChange={(event) => setPublicationFilter(event.target.value)} className="bg-transparent font-semibold outline-none"><option value="Toutes les publications">Toutes les publications</option><option value="draft">Brouillon</option><option value="review">À vérifier</option><option value="published">Publié</option><option value="archived">Archivé</option></select></label>
-        <button type="button" onClick={() => exportCsv(filtered)} disabled={filtered.length === 0} className="flex h-10 items-center gap-2 rounded-lg border border-[#e5eae5] px-3 text-[10px] font-semibold text-[#52655b] disabled:opacity-50"><Download size={13}/> Exporter</button>
+        <label className="flex h-10 items-center gap-2 rounded-lg border border-[#e5eae5] px-3 text-xs text-[#67776f]"><SlidersHorizontal size={13}/><select aria-label="Filtrer par disponibilité" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="bg-transparent font-semibold outline-none"><option>Tous les statuts</option><option>Disponible</option><option>À louer</option><option>Réservé</option><option>Vendu</option></select></label>
+        <label className="flex h-10 items-center gap-2 rounded-lg border border-[#e5eae5] px-3 text-xs text-[#67776f]"><select aria-label="Filtrer par publication" value={publicationFilter} onChange={(event) => setPublicationFilter(event.target.value)} className="bg-transparent font-semibold outline-none"><option value="Toutes les publications">Toutes les publications</option><option value="draft">Brouillon</option><option value="review">À vérifier</option><option value="published">Publié</option><option value="archived">Archivé</option></select></label>
+        <button type="button" onClick={() => exportCsv(filtered)} disabled={filtered.length === 0} className="flex h-10 items-center gap-2 rounded-lg border border-[#e5eae5] px-3 text-xs font-semibold text-[#52655b] disabled:opacity-50"><Download size={13}/> Exporter</button>
         {canWrite && <button type="button" onClick={() => setCreating(true)} className="flex h-10 items-center gap-2 rounded-lg bg-[#32743d] px-4 text-xs font-bold text-white"><Plus size={14}/> Ajouter un bien</button>}
       </div>
     </div>
     {error && <p role="alert" className="mt-3 rounded-lg bg-[#fbf0ee] p-3 text-xs text-[#8d3c32]">{error}</p>}
     <div className="mt-5 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.9fr)]">
       <section aria-labelledby="admin-listings-title" className="min-w-0">
-        <div className="mb-3 flex items-end justify-between gap-3"><div><h2 id="admin-listings-title" className="text-base font-semibold text-[#18371d]">Annonces</h2><p className="mt-1 text-xs text-[#718078]">{filtered.length} sur {properties.length} · données chargées depuis le serveur</p></div></div>
+        <div className="mb-3 flex items-end justify-between gap-3"><div><h2 id="admin-listings-title" className="text-base font-semibold text-[#18371d]">Annonces</h2><p className="mt-1 text-xs text-[#56605a]">{filtered.length} sur {properties.length} · données chargées depuis le serveur</p></div></div>
         <div className="space-y-3">
           {filtered.map((property) => {
             const photo = property.photos?.[0];
@@ -450,16 +451,16 @@ export function AdminPropertiesTable({
             return <article key={property.id} className="overflow-hidden rounded-2xl border border-[#e6ebe6] bg-white shadow-sm sm:flex">
               <ListingThumbnail key={photo?.previewSrc ?? photo?.src ?? "empty"} photo={photo}/>
               <div className="min-w-0 flex-1 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-2"><div className="min-w-0"><h3 className="break-words text-sm font-bold text-[#18371d]">{property.title}</h3><p className="mt-1 text-xs text-[#718078]">{property.location}</p></div><span className="rounded-full bg-[#edf4ed] px-2.5 py-1 text-[10px] font-bold text-[#32743d]">{({ draft: "Brouillon", review: "À vérifier", published: "Publié", archived: "Archivé" } as const)[property.publicationStatus]}</span></div>
+                <div className="flex flex-wrap items-start justify-between gap-2"><div className="min-w-0"><h3 className="break-words text-sm font-bold text-[#18371d]">{property.title}</h3><p className="mt-1 text-xs text-[#56605a]">{property.location}</p></div><span className="rounded-full bg-[#edf4ed] px-2.5 py-1 text-xs font-bold text-[#32743d]">{({ draft: "Brouillon", review: "À vérifier", published: "Publié", archived: "Archivé" } as const)[property.publicationStatus]}</span></div>
                 <p className="mt-3 text-sm font-bold text-[#18371d]">{property.priceLabel}</p>
-                <p className="mt-1 text-xs leading-5 text-[#718078]">{property.kind} · {property.area} m² · Réf. {property.ref}</p>
+                <p className="mt-1 text-xs leading-5 text-[#56605a]">{property.kind} · {property.area} m² · Réf. {property.ref}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
                   <label className="flex items-center gap-2 text-[#52655b]"><span className="sr-only">Disponibilité {property.ref}</span><select aria-label={`Disponibilité ${property.ref}`} disabled={!canWrite || busyId === property.id} value={property.status} onChange={(event) => updateStatus(property, event.target.value)} className="rounded-full border border-[#dce9dd] bg-[#f3f7f2] px-3 py-1.5 text-xs font-semibold text-[#32743d] disabled:opacity-70"><option>Disponible</option><option>À louer</option><option>Réservé</option><option>Vendu</option></select></label>
-                  {isPositioned ? <button type="button" onClick={() => setFocus((current) => ({ id: property.id, nonce: current.nonce + 1 }))} className="inline-flex items-center gap-1 font-semibold text-[#32743d]"><MapPin size={14}/>Voir sur la carte</button> : <span className="text-[#718078]">{property.publicationStatus === "published" ? "Position non renseignée" : "Non affichée sur la carte"}</span>}
+                  {isPositioned ? <button type="button" onClick={() => setFocus((current) => ({ id: property.id, nonce: current.nonce + 1 }))} className="inline-flex items-center gap-1 font-semibold text-[#32743d]"><MapPin size={14}/>Voir sur la carte</button> : <span className="text-[#56605a]">{property.publicationStatus === "published" ? "Position non renseignée" : "Non affichée sur la carte"}</span>}
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#edf0ed] pt-3 text-xs font-semibold text-[#32743d]">
                   {canWrite && <><button type="button" onClick={() => setEditing(property)} aria-label={`Modifier ${property.ref}`} className="inline-flex items-center gap-1"><Pencil size={14}/>Modifier</button><button type="button" onClick={() => setDuplicating(property)} aria-label={`Dupliquer ${property.ref}`} className="inline-flex items-center gap-1"><Copy size={14}/>Dupliquer</button></>}
-                  <Link href={`/admin/biens/${property.id}/fichiers`} aria-label={`Fichiers ${property.ref}`}>Fichiers</Link>
+                  {canReadFiles && <Link href={`/admin/biens/${property.id}/fichiers`} aria-label={`Fichiers ${property.ref}`}>Fichiers</Link>}
                   {property.category === "terrain" && <Link href={`/admin/biens/${property.id}/geospatial`} aria-label={`Fiche géospatiale ${property.ref}`}>Fiche géospatiale</Link>}
                   {canReview && property.publicationStatus === "review" && <button type="button" onClick={() => setReviewing(property)}>Contrôler</button>}
                   {property.publicationStatus === "published" && <Link href={`/${property.category === "terrain" ? "terrains" : "immobilier"}/${property.slug}`} target="_blank" aria-label={`Voir ${property.ref}`} className="inline-flex items-center gap-1">Voir <Eye size={12}/><ArrowUpRight size={11}/></Link>}
@@ -467,12 +468,12 @@ export function AdminPropertiesTable({
               </div>
             </article>;
           })}
-          {filtered.length === 0 && <p className="rounded-2xl border border-dashed border-[#dce6dc] bg-white p-10 text-center text-sm text-[#718078]">Aucune annonce ne correspond à cette recherche.</p>}
+          {filtered.length === 0 && <p className="rounded-2xl border border-dashed border-[#dce6dc] bg-white p-10 text-center text-sm text-[#56605a]">Aucune annonce ne correspond à cette recherche.</p>}
         </div>
       </section>
       <section aria-labelledby="admin-map-title" className="min-w-0 rounded-2xl border border-[#e6ebe6] bg-white p-4 xl:sticky xl:top-24">
         <h2 id="admin-map-title" className="text-base font-semibold text-[#18371d]">Carte des annonces publiées</h2>
-        <p className="mb-4 mt-1 text-xs leading-5 text-[#718078]">{markers.length} repère(s) approximatif(s) parmi les résultats. Les brouillons et annonces non publiées restent hors de la carte.</p>
+        <p className="mb-4 mt-1 text-xs leading-5 text-[#56605a]">{markers.length} repère(s) approximatif(s) parmi les résultats. Les brouillons et annonces non publiées restent hors de la carte.</p>
         <CesiumMapPanel markers={markers} focusId={focus.id} focusNonce={focus.nonce} heightClassName="h-[320px] xl:h-[520px]" note="Positions approximatives des annonces publiées uniquement ; aucun emplacement exact de parcelle n’est affiché."/>
       </section>
     </div>

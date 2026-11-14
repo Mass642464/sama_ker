@@ -45,6 +45,14 @@ test("accepts CORS preflight from the configured frontend", async () => {
   assert.equal(response.headers.get("access-control-allow-methods"), "POST, OPTIONS");
 });
 
+test("returns baseline security headers from the API", async () => {
+  const response = await fetch(`${apiUrl}/api/contact`, { headers: { Origin: frontendOrigin } });
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("referrer-policy"), "strict-origin-when-cross-origin");
+  assert.equal(response.headers.get("permissions-policy"), "camera=(), microphone=(), geolocation=(self)");
+});
+
 test("allows authenticated admin headers in CORS preflight", async () => {
   const response = await fetch(`${apiUrl}/api/admin/session`, {
     method: "OPTIONS",

@@ -28,7 +28,7 @@ function requiredPermission(resource: string, method: string, path: string[]): P
     case "visits": return read ? "appointments:read" : "appointments:write";
     case "staff": return "staff:manage";
     case "audit": return "audit:read";
-    case "files": return read ? "properties:read" : "properties:write";
+    case "files": return read ? "files:read" : "properties:write";
     case "listing-images": return method === "POST" || method === "DELETE" ? "properties:write" : undefined;
     case "geospatial-profile": return read ? "properties:read" : "properties:write";
     case "work": return read ? "work:read" : "work:write";

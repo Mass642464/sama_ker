@@ -119,7 +119,7 @@ test("validates the session with Supabase before returning the admin identity", 
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), {
     email: "admin@example.test", role: "admin", roleLabel: "Administrateur", canReview: true,
-    permissions: ["dashboard:read", "properties:read", "properties:write", "leads:read", "leads:write", "appointments:read", "appointments:write", "staff:manage", "audit:read", "work:read", "work:write", "work:assign", "properties:review"],
+    permissions: ["dashboard:read", "properties:read", "properties:write", "files:read", "leads:read", "leads:write", "appointments:read", "appointments:write", "staff:manage", "audit:read", "work:read", "work:write", "work:assign", "properties:review"],
   });
 });
 

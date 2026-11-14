@@ -114,11 +114,11 @@ export function LeadFollowUp({ lead, onChanged }: Props) {
 
       <div>
         <p className="mb-1 font-semibold text-[#52655a]">Historique</p>
-        {!events && !error && <p className="text-[#89948d]">Chargement…</p>}
-        {events && events.length === 0 && <p className="text-[#89948d]">Aucune action enregistrée pour ce prospect.</p>}
+        {!events && !error && <p className="text-[#56605a]">Chargement…</p>}
+        {events && events.length === 0 && <p className="text-[#56605a]">Aucune action enregistrée pour ce prospect.</p>}
         <ul className="space-y-2">
           {events?.map((event) => <li key={event.id} className="rounded-lg bg-white p-2">
-            <span className="block text-[11px] text-[#89948d]">{dateTimeFormatter.format(new Date(event.at))} · {kindLabels[event.kind]} · {event.actor}</span>
+            <span className="block text-[11px] text-[#56605a]">{dateTimeFormatter.format(new Date(event.at))} · {kindLabels[event.kind]} · {event.actor}</span>
             {event.body && <p className="mt-1 whitespace-pre-wrap leading-5 text-[#3c4f45]">{event.body}</p>}
           </li>)}
         </ul>

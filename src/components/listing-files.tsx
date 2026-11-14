@@ -115,20 +115,20 @@ export function ListingFiles({ listingId }: { listingId: string }) {
 
     {error && <p role="alert" className="rounded-lg bg-[#fbf0ee] p-3 text-xs text-[#8d3c32]">{error}</p>}
 
-    {files === null && !error && <p className="text-xs text-[#849188]">Chargement…</p>}
-    {files && files.length === 0 && <p className="text-xs text-[#849188]">Aucun fichier privé pour cette annonce.</p>}
+    {files === null && !error && <p className="text-xs text-[#56605a]">Chargement…</p>}
+    {files && files.length === 0 && <p className="text-xs text-[#56605a]">Aucun fichier privé pour cette annonce.</p>}
     {files && files.length > 0 && <ul className="divide-y divide-[#f0f2f0] rounded-xl border border-[#e6ebe6] bg-white">
       {files.map((file) => <li key={file.id} className="flex items-center justify-between gap-3 p-3.5 text-xs">
         <span className="flex min-w-0 items-center gap-3">
-          <FileText size={16} className="shrink-0 text-[#60856c]"/>
+          <FileText size={16} className="shrink-0 text-[#3d7759]"/>
           <span className="min-w-0">
             <strong className="block truncate text-[#344b3f]">{file.name}</strong>
-            <span className="text-[11px] text-[#89948d]">{allowedTypes.get(file.type) ?? file.type} · {formatSize(file.sizeBytes)} · {dateFormatter.format(new Date(file.createdAt))}</span>
+            <span className="text-[11px] text-[#56605a]">{allowedTypes.get(file.type) ?? file.type} · {formatSize(file.sizeBytes)} · {dateFormatter.format(new Date(file.createdAt))}</span>
           </span>
         </span>
         <span className="flex shrink-0 items-center gap-1">
           <button type="button" onClick={() => void download(file)} aria-label={`Télécharger ${file.name}`} className="rounded-lg p-2 text-[#3d7759] hover:bg-[#edf4ed]"><Download size={15}/></button>
-          {canWrite && <button type="button" disabled={busy} onClick={() => void remove(file)} aria-label={`Supprimer ${file.name}`} className="rounded-lg p-2 text-[#89948d] hover:bg-[#fbf0ee] hover:text-[#8d3c32] disabled:opacity-60"><Trash2 size={15}/></button>}
+          {canWrite && <button type="button" disabled={busy} onClick={() => void remove(file)} aria-label={`Supprimer ${file.name}`} className="rounded-lg p-2 text-[#56605a] hover:bg-[#fbf0ee] hover:text-[#8d3c32] disabled:opacity-60"><Trash2 size={15}/></button>}
         </span>
       </li>)}
     </ul>}

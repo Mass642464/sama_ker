@@ -53,6 +53,7 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
               src="/images/parcel.jpg"
               alt=""
               fill
+              loading="eager"
               sizes="(max-width: 640px) 100vw, 1240px"
               className={`home-showcase__image object-cover ${activeSlide === 0 ? "home-showcase__image--active" : ""}`}
             />
@@ -67,7 +68,7 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
             <div className="relative z-10">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-[.17em] text-[#e2c893]">Immobilier &amp; expertise géospatiale · Sénégal</span>
+                  <span className="text-xs font-bold uppercase tracking-[.17em] text-[#e2c893]">Immobilier &amp; expertise géospatiale · Sénégal</span>
                   <h1 className="mt-3 max-w-[700px] text-[clamp(2rem,5vw,3.8rem)] font-semibold leading-[1.04] tracking-[-.045em] text-white">
                     Votre projet mérite<br className="hidden sm:block"/> une vision du territoire.
                   </h1>
@@ -94,10 +95,10 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
 
               <form action={activeCategory === "Parcelle" ? "/terrains" : activeCategory === "Louer" || activeCategory === "Acheter" ? "/immobilier" : "/services"} method="get" className="mt-3 flex max-w-[700px] items-center gap-2 rounded-full border border-[#e7e9e7] bg-white p-2 pl-4 shadow-[0_8px_28px_rgba(27,38,30,.15)]">
                 {activeCategory === "Louer" && <input type="hidden" name="statut" value="À louer"/>}
-                <Search size={17} className="shrink-0 text-[#777e79]"/>
+                <Search size={17} className="shrink-0 text-[#56605a]"/>
                 <label className="min-w-0 flex-1">
                   <span className="sr-only">Rechercher un bien ou un lieu</span>
-                  <input name="localisation" placeholder="Ville, quartier ou type de bien…" className="h-10 w-full bg-transparent text-xs text-[#242a26] outline-none placeholder:text-[#999f9a] sm:text-sm"/>
+                  <input name="localisation" placeholder="Ville, quartier ou type de bien…" className="h-10 w-full bg-transparent text-xs text-[#242a26] outline-none placeholder:text-[#56605a] sm:text-sm"/>
                 </label>
                 <Link href="/terrains" aria-label="Filtres avancés" className="grid size-10 shrink-0 place-items-center rounded-full bg-[#f5f1e8] text-[#515b54] hover:bg-[#e3ebe3]">
                   <SlidersHorizontal size={16}/>
@@ -110,7 +111,7 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
               </form>
 
               <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-[9px] leading-4 text-white/75">
+                <p className="text-xs leading-4 text-white/75">
               Visuels d’inspiration uniquement · ils ne représentent pas des annonces vérifiées.
                 </p>
                 <div className="flex shrink-0 items-center gap-2">
@@ -148,7 +149,7 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
             {shortcuts.map(({ label, detail, href, icon: Icon }) => (
               <Link key={href} href={href} className="home-shortcut group flex min-h-[86px] items-center gap-3 rounded-2xl border border-[#e7e9e7] bg-white p-3.5 hover:border-[#cbd9cc] hover:shadow-[0_8px_24px_rgba(24,38,26,.06)] sm:min-h-[96px] sm:p-4">
                 <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#eef3ee] text-[#4c8551] transition group-hover:bg-[#deebde]"><Icon size={18}/></span>
-                <span className="min-w-0"><strong className="block text-xs font-semibold text-[#202722] sm:text-sm">{label}</strong><span className="mt-1 block text-[9px] leading-4 text-[#89908b] sm:text-[10px]">{detail}</span></span>
+                <span className="min-w-0"><strong className="block text-xs font-semibold text-[#202722] sm:text-sm">{label}</strong><span className="mt-1 block text-xs leading-4 text-[#56605a] sm:text-xs">{detail}</span></span>
               </Link>
             ))}
           </div>
@@ -160,11 +161,11 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
               <span className="eyebrow">À découvrir</span>
               <h2 className="mt-1.5 text-xl font-semibold tracking-tight text-[#174c38] sm:text-2xl">Des lieux pour vos projets</h2>
             </div>
-            <Link href="/terrains" className="inline-flex items-center gap-1.5 pb-1 text-[10px] font-semibold text-[#4c8551] sm:text-xs">
+            <Link href="/terrains" className="inline-flex items-center gap-1.5 pb-1 text-xs font-semibold text-[#4c8551] sm:text-xs">
               Tout voir <ArrowRight size={14}/>
             </Link>
           </div>
-          {properties.some((property) => property.isDemo) && <p className="mb-4 rounded-xl bg-[#f0f1ee] px-3 py-2 text-[10px] leading-4 text-[#767d77]">
+          {properties.some((property) => property.isDemo) && <p className="mb-4 rounded-xl bg-[#f0f1ee] px-3 py-2 text-xs leading-4 text-[#56605a]">
             Annonces et images de démonstration : informations, prix et disponibilités non vérifiés.
           </p>}
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -172,7 +173,7 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
               <PropertyCard key={property.slug} property={property}/>
             ))}
           </div>
-          {properties.length === 0 && <p className="rounded-xl bg-[#f0f1ee] px-4 py-6 text-sm text-[#767d77]">Aucune annonce publiée pour le moment.</p>}
+          {properties.length === 0 && <p className="rounded-xl bg-[#f0f1ee] px-4 py-6 text-sm text-[#56605a]">Aucune annonce publiée pour le moment.</p>}
         </section>
 
         <section className="pb-10 sm:pb-14">
@@ -187,13 +188,13 @@ export function SamaKeurHome({ properties }: { properties: Property[] }) {
             <div className="relative z-10 flex min-h-[210px] flex-col justify-between sm:min-h-[236px]">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <span className="text-[9px] font-bold uppercase tracking-[.17em] text-[#aeb7b0]">Explorer le territoire</span>
+                  <span className="text-xs font-bold uppercase tracking-[.17em] text-[#aeb7b0]">Explorer le territoire</span>
                   <h2 className="mt-2 max-w-[300px] text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">Les biens, sur la carte.</h2>
                   <p className="mt-2 max-w-[300px] text-xs leading-5 text-white/60">Repères illustratifs uniquement · positions à confirmer.</p>
                 </div>
                 <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-[#141815] transition group-hover:bg-[#dcebdc]"><ArrowUpRight size={18}/></span>
               </div>
-              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-black/25 px-3 py-2 text-[10px] font-semibold text-white/85 backdrop-blur">
+              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-black/25 px-3 py-2 text-xs font-semibold text-white/85 backdrop-blur">
                 <MapPin size={13} className="text-[#7eb67e]"/> Ouvrir l’aperçu cartographique
               </span>
             </div>

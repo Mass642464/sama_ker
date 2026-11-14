@@ -29,7 +29,7 @@ export default function DiasporaPage() {
               src="/images/diaspora.jpg"
               alt="Illustration numérique d’un globe relié par des réseaux, utilisée pour évoquer les échanges à distance"
               fill
-              priority
+              preload
               sizes="(max-width: 768px) 100vw, 45vw"
               className="object-cover object-[center_58%]"
             />
@@ -41,7 +41,7 @@ export default function DiasporaPage() {
         </div>
       </div>
     </section>
-    <section className="container grid gap-12 py-16 md:grid-cols-[.8fr_1.2fr]"><div><span className="eyebrow">Comment ça se passe ?</span><h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#174c38]">Des repères, à chaque étape.</h2><p className="mt-4 text-sm leading-6 text-[#708078]">Nous commençons par comprendre votre besoin, puis nous convenons ensemble des prochaines étapes. Aucune décision ne doit être prise dans la précipitation.</p><p className="mt-5 flex items-start gap-2 text-xs leading-5 text-[#89938d]"><Check size={14} className="mt-0.5 shrink-0 text-[#548365]"/>Une checklist documentaire pourra être définie avec votre conseiller selon la nature du projet.</p></div><ol className="space-y-3">{steps.map((step, index) => <li key={step} className="flex gap-4 rounded-xl border border-[#e7e0d4] bg-white p-5"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#edf4ee] text-xs font-bold text-[#3d7759]">0{index + 1}</span><span className="pt-1 text-sm font-semibold leading-5 text-[#324a3e]">{step}</span></li>)}</ol></section>
+    <section className="container grid gap-12 py-16 md:grid-cols-[.8fr_1.2fr]"><div><span className="eyebrow">Comment ça se passe ?</span><h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#174c38]">Des repères, à chaque étape.</h2><p className="mt-4 text-sm leading-6 text-[#56605a]">Nous commençons par comprendre votre besoin, puis nous convenons ensemble des prochaines étapes. Aucune décision ne doit être prise dans la précipitation.</p><p className="mt-5 flex items-start gap-2 text-xs leading-5 text-[#56605a]"><Check size={14} className="mt-0.5 shrink-0 text-[#548365]"/>Une checklist documentaire pourra être définie avec votre conseiller selon la nature du projet.</p></div><ol className="space-y-3">{steps.map((step, index) => <li key={step} className="flex gap-4 rounded-xl border border-[#e7e0d4] bg-white p-5"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#edf4ee] text-xs font-bold text-[#3d7759]">0{index + 1}</span><span className="pt-1 text-sm font-semibold leading-5 text-[#324a3e]">{step}</span></li>)}</ol></section>
     <section className="container pb-16"><div className="rounded-2xl bg-[#f0f3ec] p-6 text-xs leading-6 text-[#65756b]"><strong className="text-[#174c38]">À noter :</strong> ce contenu est pédagogique et ne remplace pas un conseil juridique, cadastral, fiscal ou professionnel. Les procédures peuvent varier selon la situation et doivent être confirmées auprès des interlocuteurs compétents.</div></section>
   </PageShell>;
 }

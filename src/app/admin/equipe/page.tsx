@@ -58,9 +58,9 @@ export default function AdminTeamPage() {
   if (!allowed) return <p role="alert" className="rounded-xl bg-[#f8f2e8] p-5 text-sm text-[#775d34]">Votre rôle ne donne pas accès à la gestion de l’équipe.</p>;
 
   return <div>
-    <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#60856c]">Administration</p>
+    <p className="text-xs font-bold uppercase tracking-[.16em] text-[#3d7759]">Administration</p>
     <h1 className="mt-2 flex items-center gap-3 text-2xl font-semibold tracking-tight text-[#18371d] sm:text-3xl"><UserCog size={24}/>Équipe et rôles</h1>
-    <p className="mt-2 max-w-2xl text-xs leading-5 text-[#718078]">Chaque personne doit déjà avoir un compte avec une adresse confirmée. Le rôle est vérifié par le serveur à chaque action, et chaque modification est consignée dans le journal d’audit.</p>
+    <p className="mt-2 max-w-2xl text-xs leading-5 text-[#56605a]">Chaque personne doit déjà avoir un compte avec une adresse confirmée. Le rôle est vérifié par le serveur à chaque action, et chaque modification est consignée dans le journal d’audit.</p>
     {error && <p role="alert" className="mt-4 rounded-lg bg-[#fbf0ee] p-3 text-xs text-[#8d3c32]">{error}</p>}
 
     <form onSubmit={add} className="mt-6 grid gap-3 rounded-2xl border border-[#e6ebe6] bg-white p-4 sm:grid-cols-[1fr_220px_auto] sm:items-end">
@@ -71,16 +71,16 @@ export default function AdminTeamPage() {
 
     <div className="mt-4 overflow-x-auto rounded-2xl border border-[#e6ebe6] bg-white">
       <table className="w-full min-w-[640px] text-left text-xs">
-        <thead className="border-b border-[#edf0ed] text-[10px] uppercase tracking-wider text-[#89948d]"><tr><th className="px-4 py-3">Adresse</th><th className="px-4 py-3">Rôle</th><th className="px-4 py-3">État</th><th className="px-4 py-3"><span className="sr-only">Action</span></th></tr></thead>
+        <thead className="border-b border-[#edf0ed] text-xs uppercase tracking-wider text-[#56605a]"><tr><th className="px-4 py-3">Adresse</th><th className="px-4 py-3">Rôle</th><th className="px-4 py-3">État</th><th className="px-4 py-3"><span className="sr-only">Action</span></th></tr></thead>
         <tbody>
-          {roster?.bootstrap.map((member) => <tr key={member.email} className="border-b border-[#f0f2f0]"><td className="px-4 py-3 font-semibold">{member.email}</td><td className="px-4 py-3">Administrateur</td><td className="px-4 py-3 text-[#3d7759]">Actif</td><td className="px-4 py-3 text-[#89948d]">Géré par la configuration du serveur</td></tr>)}
+          {roster?.bootstrap.map((member) => <tr key={member.email} className="border-b border-[#f0f2f0]"><td className="px-4 py-3 font-semibold">{member.email}</td><td className="px-4 py-3">Administrateur</td><td className="px-4 py-3 text-[#3d7759]">Actif</td><td className="px-4 py-3 text-[#56605a]">Géré par la configuration du serveur</td></tr>)}
           {roster?.members.map((member) => <tr key={member.email} className="border-b border-[#f0f2f0] last:border-0">
             <td className="px-4 py-3 font-semibold">{member.email}</td>
-            <td className="px-4 py-3"><select aria-label={`Rôle de ${member.email}`} value={member.role} disabled={saving} onChange={(event) => void save({ ...member, role: event.target.value })} className="rounded-lg border border-[#e5eae5] bg-white px-2 py-1.5">{roster.roles.map((item) => <option key={item.role} value={item.role}>{item.label}</option>)}</select><span className="mt-1 block max-w-xs text-[11px] text-[#89948d]">{roleHelp[member.role]}</span></td>
+            <td className="px-4 py-3"><select aria-label={`Rôle de ${member.email}`} value={member.role} disabled={saving} onChange={(event) => void save({ ...member, role: event.target.value })} className="rounded-lg border border-[#e5eae5] bg-white px-2 py-1.5">{roster.roles.map((item) => <option key={item.role} value={item.role}>{item.label}</option>)}</select><span className="mt-1 block max-w-xs text-[11px] text-[#56605a]">{roleHelp[member.role]}</span></td>
             <td className={`px-4 py-3 ${member.active ? "text-[#3d7759]" : "text-[#946447]"}`}>{member.active ? "Actif" : "Désactivé"}</td>
             <td className="px-4 py-3"><button type="button" disabled={saving} onClick={() => void save({ ...member, active: !member.active })} className="rounded-lg border border-[#e5eae5] px-3 py-1.5 font-semibold">{member.active ? "Désactiver" : "Réactiver"}</button></td>
           </tr>)}
-          {roster && roster.members.length === 0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-[#89948d]">Aucun membre ajouté en dehors des administrateurs d’amorçage.</td></tr>}
+          {roster && roster.members.length === 0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-[#56605a]">Aucun membre ajouté en dehors des administrateurs d’amorçage.</td></tr>}
         </tbody>
       </table>
     </div>

@@ -177,9 +177,9 @@ export function ClientVault({ email }: { email: string }) {
 
       <div className="overflow-hidden rounded-2xl border border-[#e6e0d5] bg-white">
         <h3 className="border-b border-[#edf0ed] px-5 py-4 font-semibold text-[#18371d]">Mes fichiers</h3>
-        {data.files.length === 0 ? <p className="p-5 text-sm text-[#718078]">Aucun document enregistré pour le moment.</p> :
+        {data.files.length === 0 ? <p className="p-5 text-sm text-[#56605a]">Aucun document enregistré pour le moment.</p> :
           <ul className="divide-y divide-[#edf0ed]">{data.files.map((file) => <li key={file.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-            <div className="min-w-0"><p className="break-all text-sm font-semibold text-[#263238]">{file.name}</p><p className="mt-1 text-xs text-[#718078]">{displaySize(file.sizeBytes)} · ajouté le {displayDate(file.createdAt)}</p></div>
+            <div className="min-w-0"><p className="break-all text-sm font-semibold text-[#263238]">{file.name}</p><p className="mt-1 text-xs text-[#56605a]">{displaySize(file.sizeBytes)} · ajouté le {displayDate(file.createdAt)}</p></div>
             <div className="flex flex-wrap items-center gap-2">
               {links[file.id] ? <a href={links[file.id]} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-[#eaf2e9] px-3 py-2 text-xs font-bold text-[#174c38]">Ouvrir (60 s)</a> : <button type="button" onClick={() => void openFile(file)} className="rounded-lg bg-[#eaf2e9] px-3 py-2 text-xs font-bold text-[#174c38]">Préparer l’ouverture</button>}
               <button type="button" disabled={busy} onClick={() => void removeFile(file)} className="rounded-lg border border-[#eadbd4] px-3 py-2 text-xs font-bold text-[#8d3c32] disabled:opacity-50">Supprimer</button>
@@ -189,7 +189,7 @@ export function ClientVault({ email }: { email: string }) {
 
       <div className="rounded-2xl border border-[#e6e0d5] bg-white p-5">
         <h3 className="font-semibold text-[#18371d]">Historique des accès</h3>
-        {data.accesses.length === 0 ? <p className="mt-2 text-sm text-[#718078]">Aucun document ouvert.</p> :
+        {data.accesses.length === 0 ? <p className="mt-2 text-sm text-[#56605a]">Aucun document ouvert.</p> :
           <ul className="mt-3 space-y-2">{data.accesses.map((entry, index) => <li key={`${entry.fileId}-${entry.accessedAt}-${index}`} className="text-sm text-[#66766c]">{displayDate(entry.accessedAt)} · {fileNames.get(entry.fileId) ?? "Document supprimé"}</li>)}</ul>}
       </div>
     </>}

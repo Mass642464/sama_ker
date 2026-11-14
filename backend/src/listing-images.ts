@@ -211,6 +211,6 @@ export async function handlePublicListingImage(request: Request, config: AdminCo
   if (!location) return jsonError("La photo publiée est momentanément indisponible.", 503);
   return new Response(null, {
     status: 302,
-    headers: { Location: location, "Cache-Control": "private, max-age=30" },
+    headers: { Location: location, "Cache-Control": "public, max-age=30, s-maxage=30" },
   });
 }

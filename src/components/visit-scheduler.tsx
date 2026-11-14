@@ -44,7 +44,7 @@ export function VisitScheduler({ property }: { property: Property }) {
 
   return <section className="container py-10 sm:py-14">
     <div className="mb-8">
-      <p className="text-xs font-bold uppercase tracking-widest text-[#60856c]">Demande de visite</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-[#3d7759]">Demande de visite</p>
       <h1 className="mt-2 text-3xl font-semibold text-[#18371d]">Proposer une visite</h1>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-[#596b61]">Choisissez une date et une heure souhaitées. L’équipe vérifiera sa disponibilité : aucun créneau n’est réservé ou confirmé à cette étape.</p>
       {property.isDemo && <p role="note" className="mt-4 rounded-xl bg-[#f8f2e8] p-4 text-sm text-[#775d34]">Annonce de démonstration : ce calendrier est un aperçu et aucune demande ne peut être envoyée pour ce bien fictif.</p>}
@@ -59,7 +59,7 @@ export function VisitScheduler({ property }: { property: Property }) {
             <button type="button" onClick={() => moveMonth(1)} aria-label="Mois suivant" className="rounded-full p-2 text-[#43584e] hover:bg-[#edf4ee]"><ChevronRight size={18}/></button>
           </div>
           <div className="grid grid-cols-7 gap-1 text-center">
-            {days.map((day) => <span key={day} className="py-2 text-xs font-semibold text-[#89938d]">{day}</span>)}
+            {days.map((day) => <span key={day} className="py-2 text-xs font-semibold text-[#56605a]">{day}</span>)}
             {Array.from({ length: offset }, (_, i) => <span key={`empty-${i}`}/>)}
             {Array.from({ length: count }, (_, i) => {
               const value = dateKey(month.year, month.month, i + 1);
@@ -70,10 +70,10 @@ export function VisitScheduler({ property }: { property: Property }) {
         <label className="mt-5 block text-sm font-semibold text-[#43584e]">Heure souhaitée (heure du Sénégal)
           <input type="time" value={time} onChange={(event) => { setTime(event.target.value); setContinuing(false); }} className="mt-2 block h-12 w-full max-w-48 rounded-xl border border-[#e5e9e3] bg-white px-4 text-sm text-[#18371d]"/>
         </label>
-        <p className="mt-2 text-xs leading-5 text-[#718078]">L’horaire est une préférence, pas une disponibilité vérifiée.</p>
+        <p className="mt-2 text-xs leading-5 text-[#56605a]">L’horaire est une préférence, pas une disponibilité vérifiée.</p>
         {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#e5e9e3] bg-white p-4">
-          <p className="text-sm text-[#43584e]">{date && time ? <><span className="block text-xs text-[#89938d]">Votre préférence</span><strong>{dateFormat.format(new Date(`${date}T00:00:00Z`))} à {time}</strong></> : "Choisissez une date et une heure."}</p>
+          <p className="text-sm text-[#43584e]">{date && time ? <><span className="block text-xs text-[#56605a]">Votre préférence</span><strong>{dateFormat.format(new Date(`${date}T00:00:00Z`))} à {time}</strong></> : "Choisissez une date et une heure."}</p>
           <button type="button" onClick={nextStep} className="rounded-full bg-[#32743d] px-6 py-3 text-sm font-bold text-white">Continuer</button>
         </div>
         {continuing && !property.isDemo && property.status !== "Vendu" && <div className="mt-6"><h2 className="mb-3 text-lg font-bold text-[#18371d]">Envoyer votre demande</h2><ContactForm propertyReference={property.ref} initialSubject="visit" visitProposal={{ date, time }}/></div>}
@@ -82,11 +82,11 @@ export function VisitScheduler({ property }: { property: Property }) {
       <aside className="overflow-hidden rounded-2xl border border-[#e5e9e3] bg-white">
         {property.photos?.[0] && <div className="relative h-44"><Image src={property.photos[0].src} alt={property.photos[0].alt} fill unoptimized sizes="320px" className="object-cover"/></div>}
         <div className="p-5">
-          <p className="text-xs font-semibold text-[#718078]">Votre demande concerne</p>
+          <p className="text-xs font-semibold text-[#56605a]">Votre demande concerne</p>
           <h2 className="mt-2 text-lg font-bold text-[#18371d]">{property.title}</h2>
           <p className="mt-2 font-bold text-[#32743d]">{property.priceLabel}</p>
-          <p className="mt-2 text-sm text-[#718078]">{property.location} · {property.area} m²</p>
-          <p className="mt-2 text-xs text-[#89938d]">Réf. {property.ref}{property.isDemo ? " · Données fictives, image d’illustration" : ""}</p>
+          <p className="mt-2 text-sm text-[#56605a]">{property.location} · {property.area} m²</p>
+          <p className="mt-2 text-xs text-[#56605a]">Réf. {property.ref}{property.isDemo ? " · Données fictives, image d’illustration" : ""}</p>
         </div>
       </aside>
     </div>

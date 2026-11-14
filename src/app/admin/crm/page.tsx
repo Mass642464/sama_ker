@@ -146,7 +146,7 @@ export default function AdminCrmPage() {
         <p className="flex items-center gap-2"><CalendarDays size={14} aria-hidden="true"/>{Number.isNaN(date.getTime()) ? "Date non disponible" : <time dateTime={lead.created_at}>{dateFormatter.format(date)}</time>}</p>
       </div>
       <div className="mt-3 flex items-center gap-2 border-t border-[#eee8dc] pt-3 text-xs text-[#52655b]">
-        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#e1ede1] text-[10px] font-bold text-[#174c38]" aria-hidden="true">{lead.assigned_to ? initials(lead.assigned_to) : <UserRound size={15}/>}</span>
+        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#e1ede1] text-xs font-bold text-[#174c38]" aria-hidden="true">{lead.assigned_to ? initials(lead.assigned_to) : <UserRound size={15}/>}</span>
         <span className="min-w-0 break-all">Responsable : {lead.assigned_to ?? "non affecté"}</span>
       </div>
       {canWrite && <label className="mt-3 block text-xs font-semibold text-[#52655b]">Étape
